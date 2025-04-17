@@ -1,51 +1,51 @@
-## Project Structure
+## 📁 Project Structure
 
-
-PlasticClassification/                <-- Project Root
-│   main.py                           <-- (Optional) Simple entry point or baseline run
-│   README.md                         <-- Overall documentation and usage notes
-│   requirements.txt (optional)       <-- Python dependencies (scikit-learn, pandas, etc.)
-│   
-├── Core/                             <-- Generic or "core" utilities for data loading/cleaning
-│   ├── __init__.py
-│   ├── data_analysis.py             <-- Exploratory data analysis (plots, stats)
-│   ├── data_cleaning.py             <-- Script that orchestrates cleaning & saves final CSV
-│   ├── datacleaner.py               <-- Class or functions to load/clean data
-│   └── Data/
-│       ├── Original_PlasticScanner_measurements/
-│       │    ├── measurement1.csv
-│       │    ├── measurement2.csv
-│       │    └── measurement3.csv
-│       ├── combined_measurements_cleaned_raw_only.csv
-│       ├── final_cleaned_measurements.csv         <-- Output of data_cleaning.py
-│       └── (other CSVs as needed)
+```text
+PlasticClassification/
+├── main.py
+├── README.md
+├── requirements.txt
 │
-├── Experiments/                     <-- Scripts that run all your experimental scenarios
+├── Core/
+│   ├── datacleaner.py
+│   ├── data_analysis.py
+│   ├── data_cleaning.py
 │   ├── __init__.py
-│   └── Experiments.py               <-- Code for advanced experiments: noise, removing wv, etc.
+│   │
+│   ├── Data/
+│   │   ├── combined_measurements.csv
+│   │   ├── combined_measurements_cleaned.csv
+│   │   ├── combined_measurements_cleaned_raw_only.csv
+│   │   │
+│   │   └── Original_PlasticScanner_measurements/
+│   │       ├── measurement1.csv
+│   │       ├── measurement2.csv
+│   │       └── measurement3.csv
+│   │
+│   └── Timer/
+│       ├── timer.py
+│       └── __init__.py
+│
+├── Experiments/
+│   ├── Experiments.py
+│   └── __init__.py
 │
 ├── NN/
-│   ├── __init__.py
-│   └── NN_model.py                  <-- Neural Network training code
+│   ├── NN_model.py
+│   └── __init__.py
 │
 ├── PCA/
-│   ├── __init__.py
-│   └── PCA_module.py                <-- PCA or dimensionality reduction logic
+│   ├── PCA_module.py
+│   └── __init__.py
 │
 ├── RF/
-│   ├── __init__.py
-│   └── RF_model.py                  <-- Random Forest training code
+│   ├── RF_model.py
+│   └── __init__.py
 │
 ├── SVM/
-│   ├── __init__.py
-│   └── SVM_model.py                 <-- SVM training code
+│   ├── SVM_model.py
+│   └── __init__.py
 │
-├── Visualizer/
-│   ├── __init__.py
-│   └── visualizer.py                <-- All plotting: accuracy/time/ noise resilience/wv removal
-│
-└── results/ (or “graphs/”)          <-- Unified location for final plots & metrics
-    ├── correlation_heatmap.png
-    ├── noise_resilience.png
-    ├── time_comparison.png
-    └── (etc.)
+└── Visualizer/
+    ├── visualizer.py
+    └── __init__.py
