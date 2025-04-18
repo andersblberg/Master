@@ -1,0 +1,29 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*.so
+
+# Environment files
+.env
+.venv/
+env/
+venv/
+
+# Jupyter notebook checkpoints
+.ipynb_checkpoints/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# VS Code project settings
+.vscode/
+
+# Compiled files and logs
+*.log
+*.tmp
+*.bak
+
+# Data/output you don’t want to push
+# *.csv
+# !Core/Data/*.csv       # Allow tracked CSVs inside Core/Data
