@@ -9,7 +9,7 @@ if project_root not in sys.path:
 
 import pandas as pd
 import numpy as np
-from Core.Timer.timer import Timer
+from src.Timer.timer import Timer
 
 class DataCleaner:
     """

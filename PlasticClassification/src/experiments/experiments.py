@@ -1,13 +1,14 @@
 # Experiments/Experiments.py
 
+import os
 import time
 import itertools
 import numpy as np
 import pandas as pd
 
-from SVM.SVM_model import train_svm_model
-from RF.RF_model import train_rf_model
-from NN.NN_model import train_nn_model
+from PlasticClassification.src.models.SVM import train_svm_model
+from PlasticClassification.src.models.RF import train_rf_model
+from PlasticClassification.src.models.NN import train_nn_model
 
 # Dictionary of models and their training functions.
 MODELS = {
