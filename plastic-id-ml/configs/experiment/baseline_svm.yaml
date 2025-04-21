@@ -1,0 +1,9 @@
+data:
+  csv_path: data/interim/combined_DB22_measurements_sorted.csv
+
+model:
+  name: svm
+  params:
+    C: 10
+    kernel: rbf
+    gamma: scale

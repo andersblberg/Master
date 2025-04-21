@@ -1,0 +1,7 @@
+# ExtraTrees default hyper‑parameters
+n_estimators: 300
+max_depth: null        # unlimited
+criterion: gini
+class_weight: balanced
+bootstrap: false
+random_state: 42

@@ -1,0 +1,4 @@
+hidden_layer_sizes: [128, 64]
+max_iter: 600
+alpha: 0.0005
+learning_rate_init: 0.002
