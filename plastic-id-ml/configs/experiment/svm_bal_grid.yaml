@@ -1,0 +1,12 @@
+data:
+  csv_path: data/interim/combined_DB22_measurements_sorted.csv
+
+model:
+  name: svm_bal
+  params:
+    # search space
+    C:   [0.1, 1, 10, 100]
+    gamma: ["scale", 0.01, 0.001]
+    kernel: ["rbf"]
+cv:
+  n_splits: 5        # if your CLI supports cross‑val

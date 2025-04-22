@@ -1,0 +1,9 @@
+data:
+  csv_path: data/interim/combined_DB22_measurements_sorted.csv
+
+model:
+  name: svm_pca8_bal          # the new pipeline
+  params:
+    C:     [0.1, 1, 10, 100]
+    gamma: ["scale", 0.01, 0.001]
+    kernel: ["rbf"]
