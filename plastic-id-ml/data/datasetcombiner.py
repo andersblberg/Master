@@ -35,7 +35,7 @@ for file in csv_files:
 
 # Abort if path is wrong / no data is loaded
 if not dataframes:
-    print("❌ No files were loaded. Nothing to combine.")
+    print("No files were loaded. Nothing to combine.")
     exit(1)
 
 # Concatenate all measurements
@@ -63,7 +63,7 @@ combined_df.reset_index(drop=True, inplace=True)
 
 # Save the organized dataset
 combined_df.to_csv(output_path, index=False)
-print(f"✅ Sorted dataset saved to: {output_path}")
+print(f"Sorted dataset saved to: {output_path}")
 
 # Generate summary counts for report
 summary = (
@@ -80,4 +80,4 @@ print(summary.to_string(index=False))
 
 # Save summary to CSV for later use
 summary.to_csv(summary_path, index=False)
-print(f"📊 Summary counts saved to: {summary_path}")
+print(f"Summary counts saved to: {summary_path}")

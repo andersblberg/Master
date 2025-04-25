@@ -88,8 +88,13 @@ def _run_core(cfg: dict, *, noise_pct: float | None = None) -> dict:
 
     tag = cfg["model"]["name"]           # e.g. "rf", "xgb", …
     save_model(model, tag)               # artifacts/<tag>.joblib
-    save_reports(ds.y_test, y_pred, tag) # artifacts/<tag>_report.json & _cm.png
-
+    save_reports(                     
+        ds.y_test,
+        y_pred,
+        tag,
+        model=model,
+        X_test=X_test,
+    )
     return metrics
 
 

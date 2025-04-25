@@ -1,0 +1,51 @@
+{
+  "HDPE": {
+    "precision": 0.2222222222222222,
+    "recall": 0.25,
+    "f1-score": 0.23529411764705882,
+    "support": 16.0
+  },
+  "LDPE": {
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1-score": 0.0,
+    "support": 13.0
+  },
+  "PET": {
+    "precision": 0.625,
+    "recall": 0.2777777777777778,
+    "f1-score": 0.38461538461538464,
+    "support": 18.0
+  },
+  "PP": {
+    "precision": 0.3684210526315789,
+    "recall": 0.4375,
+    "f1-score": 0.4,
+    "support": 16.0
+  },
+  "PS": {
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1-score": 0.0,
+    "support": 13.0
+  },
+  "PVC": {
+    "precision": 0.29545454545454547,
+    "recall": 0.7222222222222222,
+    "f1-score": 0.41935483870967744,
+    "support": 18.0
+  },
+  "accuracy": 0.30851063829787234,
+  "macro avg": {
+    "precision": 0.25184963671805777,
+    "recall": 0.28125,
+    "f1-score": 0.23987739016202014,
+    "support": 94.0
+  },
+  "weighted avg": {
+    "precision": 0.27679227889194297,
+    "recall": 0.30851063829787234,
+    "f1-score": 0.2620869138532347,
+    "support": 94.0
+  }
+}

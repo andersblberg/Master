@@ -1,26 +1,20 @@
 {
   "HDPE": {
-    "precision": 0.8823529411764706,
+    "precision": 0.9375,
     "recall": 0.9375,
-    "f1-score": 0.9090909090909091,
+    "f1-score": 0.9375,
     "support": 16.0
   },
   "LDPE": {
-    "precision": 0.9090909090909091,
-    "recall": 0.7692307692307693,
-    "f1-score": 0.8333333333333334,
+    "precision": 0.9166666666666666,
+    "recall": 0.8461538461538461,
+    "f1-score": 0.88,
     "support": 13.0
   },
-  "Other": {
-    "precision": 0.8,
-    "recall": 1.0,
-    "f1-score": 0.8888888888888888,
-    "support": 8.0
-  },
   "PET": {
-    "precision": 1.0,
+    "precision": 0.8181818181818182,
     "recall": 1.0,
-    "f1-score": 1.0,
+    "f1-score": 0.9,
     "support": 18.0
   },
   "PP": {
@@ -31,33 +25,27 @@
   },
   "PS": {
     "precision": 1.0,
-    "recall": 1.0,
-    "f1-score": 1.0,
+    "recall": 0.9230769230769231,
+    "f1-score": 0.96,
     "support": 13.0
   },
   "PVC": {
-    "precision": 0.9,
-    "recall": 1.0,
-    "f1-score": 0.9473684210526315,
+    "precision": 1.0,
+    "recall": 0.9444444444444444,
+    "f1-score": 0.9714285714285714,
     "support": 18.0
   },
-  "unknown": {
-    "precision": 0.0,
-    "recall": 0.0,
-    "f1-score": 0.0,
-    "support": 2.0
-  },
-  "accuracy": 0.9230769230769231,
+  "accuracy": 0.925531914893617,
   "macro avg": {
-    "precision": 0.8030971479500892,
-    "recall": 0.8227163461538461,
-    "f1-score": 0.8102384198521719,
-    "support": 104.0
+    "precision": 0.934280303030303,
+    "recall": 0.9210292022792023,
+    "f1-score": 0.9253590629800307,
+    "support": 94.0
   },
   "weighted avg": {
-    "precision": 0.9083573289455642,
-    "recall": 0.9230769230769231,
-    "f1-score": 0.9134052256930016,
-    "support": 104.0
+    "precision": 0.9316731141199226,
+    "recall": 0.925531914893617,
+    "f1-score": 0.9261417786057456,
+    "support": 94.0
   }
 }

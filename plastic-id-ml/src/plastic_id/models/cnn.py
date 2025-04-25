@@ -1,66 +1,146 @@
+# ──────────────────────────────────────────────────────────────────────────────
 # src/plastic_id/models/cnn.py
+# A tiny fully-connected “CNN” (really an MLP) for the 8-band spectra.
+# It follows the scikit-learn API so the rest of the code-base can call
+# .fit / .predict / .predict_proba just like with RF, SVM, …
+# ──────────────────────────────────────────────────────────────────────────────
+from __future__ import annotations
+from typing import Final
+
+import numpy as np
 import torch
 import torch.nn as nn
-from torch.utils.data import TensorDataset, DataLoader
-import numpy as np
-from sklearn.preprocessing import LabelEncoder
+import torch.nn.functional as F
+from torch.utils.data import DataLoader, TensorDataset
+
+from sklearn.base import BaseEstimator, ClassifierMixin
+from sklearn.utils.validation import check_is_fitted
 
 
-class Simple1DCNN(nn.Module):
-    def __init__(self, n_channels: int = 8, n_classes: int = 10, p_drop: float = 0.3):
+N_FEATURES: Final[int] = 8            # 8 wavelength bands
+N_CLASSES:  Final[int] = 6            # HDPE, LDPE, …, PVC
+
+
+# ───────────────────────────── network definition ────────────────────────────
+class _Net(nn.Module):
+    def __init__(self):
         super().__init__()
-        self.net = nn.Sequential(
-            nn.Conv1d(1, 32, kernel_size=3, padding=1),
-            nn.ReLU(),
-            nn.BatchNorm1d(32),
-            nn.Dropout(p_drop),
-            nn.Conv1d(32, 64, kernel_size=3, padding=1),
-            nn.ReLU(),
-            nn.AdaptiveAvgPool1d(1),   # → 64 × 1
-            nn.Flatten(),
-            nn.Linear(64, n_classes),
-        )
+        self.fc1 = nn.Linear(N_FEATURES, 64)
+        self.fc2 = nn.Linear(64, 32)
+        self.out = nn.Linear(32, N_CLASSES)
 
-    def forward(self, x):             # x shape: (B, 8)
-        return self.net(x.unsqueeze(1))
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        return self.out(x)
 
 
-class CNNClassifier:
-    """Scikit‑learn style wrapper around the above network."""
-    def __init__(self, epochs: int = 200, lr: float = 1e-3, batch: int = 64):
-        self.epochs, self.lr, self.batch = epochs, lr, batch
-        self.le = LabelEncoder()
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        self.model = None
+# ───────────────────────── wrapper: scikit-learn style ───────────────────────
+class CNNClassifier(BaseEstimator, ClassifierMixin):
+    """
+    Small PyTorch net wrapped in scikit-learn API.
 
-    # ------------------------------------------------------------------ #
-    def fit(self, X: np.ndarray, y):
-        y = self.le.fit_transform(y)
-        n_classes = len(self.le.classes_)
-        self.model = Simple1DCNN(X.shape[1], n_classes).to(self.device)
+    Parameters
+    ----------
+    lr : float
+        Adam learning-rate.
+    epochs : int
+        Maximum training epochs.
+    batch_size : int
+        Mini-batch size.
+    weight_decay : float
+        L2 regularisation factor.
+    patience : int
+        Early-stopping patience (epochs without val-loss improvement).
+    seed : int
+        RNG seed for reproducibility.
+    """
 
-        ds = TensorDataset(torch.tensor(X, dtype=torch.float32),
-                           torch.tensor(y, dtype=torch.long))
-        dl = DataLoader(ds, batch_size=self.batch, shuffle=True)
+    def __init__(
+        self,
+        lr: float = 1e-3,
+        epochs: int = 150,
+        batch_size: int = 32,
+        weight_decay: float = 1e-4,
+        patience: int = 20,
+        seed: int = 42,
+    ):
+        self.lr = lr
+        self.epochs = epochs
+        self.batch_size = batch_size
+        self.weight_decay = weight_decay
+        self.patience = patience
+        self.seed = seed
 
-        opt = torch.optim.Adam(self.model.parameters(), lr=self.lr)
-        loss_fn = nn.CrossEntropyLoss()
+    # ────────────── scikit-learn mandatory methods ──────────────
+    def fit(self, X: np.ndarray, y: np.ndarray):
+        g = torch.Generator().manual_seed(self.seed)
+        X = torch.tensor(X, dtype=torch.float32)
+        y = torch.tensor(self._encode_labels(y), dtype=torch.long)
 
-        self.model.train()
-        for _ in range(self.epochs):
-            for xb, yb in dl:
-                xb, yb = xb.to(self.device), yb.to(self.device)
+        ds      = TensorDataset(X, y)
+        n_val   = max(1, int(0.1 * len(ds)))        # 10 % for val-loss
+        ds_train, ds_val = torch.utils.data.random_split(ds, [len(ds)-n_val, n_val], generator=g)
+
+        train_loader = DataLoader(ds_train, batch_size=self.batch_size, shuffle=True,  generator=g)
+        val_loader   = DataLoader(ds_val,   batch_size=self.batch_size, shuffle=False)
+
+        self._net = _Net()
+        opt  = torch.optim.Adam(self._net.parameters(), lr=self.lr, weight_decay=self.weight_decay)
+        crit = nn.CrossEntropyLoss()
+
+        best_val = float("inf")
+        since_improved = 0
+
+        for epoch in range(self.epochs):
+            self._net.train()
+            for xb, yb in train_loader:
                 opt.zero_grad()
-                loss_fn(self.model(xb), yb).backward()
+                loss = crit(self._net(xb), yb)
+                loss.backward()
                 opt.step()
 
+            # ── validation loss for early-stopping ──
+            self._net.eval()
+            with torch.no_grad():
+                val_loss = sum(
+                    crit(self._net(xb), yb).item() * len(xb) for xb, yb in val_loader
+                ) / len(ds_val)
+
+            if val_loss < best_val - 1e-4:   # tiny tolerance
+                best_val = val_loss
+                since_improved = 0
+                self._best_state = self._net.state_dict()  # save best params
+            else:
+                since_improved += 1
+                if since_improved >= self.patience:
+                    break  # early stop
+
+        # load best weights
+        self._net.load_state_dict(self._best_state)
+        self._net.eval()
         return self
 
-    def predict(self, X):
-        self.model.eval()
+    def predict(self, X: np.ndarray) -> np.ndarray:
+        check_is_fitted(self, "_net")
+        X = torch.tensor(X, dtype=torch.float32)
         with torch.no_grad():
-            logits = self.model(
-                torch.tensor(X, dtype=torch.float32).to(self.device)
-            )
-        preds = logits.argmax(dim=1).cpu().numpy()
-        return self.le.inverse_transform(preds)
+            logits = self._net(X)
+            return self._decode_labels(torch.argmax(logits, dim=1).cpu().numpy())
+
+    def predict_proba(self, X: np.ndarray) -> np.ndarray:
+        check_is_fitted(self, "_net")
+        X = torch.tensor(X, dtype=torch.float32)
+        with torch.no_grad():
+            logits = self._net(X)
+            return F.softmax(logits, dim=1).cpu().numpy()
+
+    # ────────────── helper: label ↔ integer mapping ─────────────
+    def _encode_labels(self, y: np.ndarray) -> np.ndarray:
+        if not hasattr(self, "_classes_"):
+            self._classes_ = np.unique(y)
+            self._class_to_idx = {c: i for i, c in enumerate(self._classes_)}
+        return np.vectorize(self._class_to_idx.get)(y)
+
+    def _decode_labels(self, idx: np.ndarray) -> np.ndarray:
+        return np.asarray(self._classes_)[idx]

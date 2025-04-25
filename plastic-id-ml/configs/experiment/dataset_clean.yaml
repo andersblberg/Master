@@ -1,0 +1,6 @@
+data:
+  csv_path: data/interim/combined_DB22_measurements_sorted_clean.csv
+
+model:
+  name: dummy
+  params: {}
