@@ -68,7 +68,7 @@ def _run_core(cfg: dict, *, noise_pct: float | None = None) -> dict:
     model = get_model(cfg["model"]["name"], cfg["model"]["params"])
 
     # -------- fit / predict ---------------------------------------------------
-    if cfg["model"]["name"] == "xgb":
+    if cfg["model"]["name"].startswith("xgb"):
         le = LabelEncoder().fit(ds.y_train)
         y_train_enc = le.transform(ds.y_train)
         with timed("fit"):

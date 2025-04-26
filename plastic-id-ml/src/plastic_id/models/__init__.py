@@ -59,10 +59,31 @@ if CNNClassifier is not None:
     REGISTRY["cnn"] = lambda cfg: CNNClassifier(**cfg)
 
 # ---------------------------------------------------------------------------
+_SUFFIX_MAP = {
+    "_norm": RowNormalizer(),
+    "_snv":  RowSNV(),
+}
+
 def get_model(name: str, cfg: dict[str, Any]):
     """
-    Return an *unfitted* model/pipeline by key, or raise a helpful error.
+    Return an *unfitted* model or model-pipeline by key.
+
+    ─ accepted keys ───────────────────────────────────────────────
+    rf, svm, et, xgb, …                ← raw spectra
+    svm_norm, rf_snv, cnn_norm, …      ← any <model> + _norm / _snv
+    ----------------------------------------------------------------
     """
+    # --- 1. does the key carry a preprocessing suffix? -------------
+    for suf, transformer in _SUFFIX_MAP.items():
+        if name.endswith(suf):
+            base_name = name[: -len(suf)]
+            if base_name not in REGISTRY:
+                raise ValueError(f"Unknown base model '{base_name}' "
+                                 f"(derived from '{name}')")
+            base_model = REGISTRY[base_name](cfg)
+            return make_pipeline(transformer, base_model)
+
+    # --- 2. plain model --------------------------------------------
     try:
         return REGISTRY[name](cfg)
     except KeyError as exc:
@@ -70,8 +91,3 @@ def get_model(name: str, cfg: dict[str, Any]):
             f"Unknown model key '{name}'. "
             f"Available: {', '.join(sorted(REGISTRY))}"
         ) from exc
-
-
-# at the very bottom of src/plastic_id/models/__init__.py
-if CNNClassifier:                       # <- class is truthy
-    REGISTRY["cnn"] = lambda cfg: CNNClassifier(**cfg)
