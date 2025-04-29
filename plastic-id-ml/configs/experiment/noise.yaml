@@ -1,0 +1,14 @@
+# configs/experiment/noise.yaml
+data:
+  csv_path: data/interim/combined_DB22_measurements_sorted_clean.csv
+  test_size: 0.20
+  random_state: 42
+preprocess: raw          # norm / snv are also fine
+model:
+  name: et               # will be overwritten by -m flag if desired
+  params: {}
+
+# NEW – interpreted only by the patch above
+eval_noise:
+  pct: 10.0               # 3 % of each value as σ
+  rng: 42                # fixed seed so runs are repeatable

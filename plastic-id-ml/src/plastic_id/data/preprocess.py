@@ -16,7 +16,7 @@ import argparse
 import yaml
 import pandas as pd
 from src.data.loaders import load_raw
-from src.utils.timer import Timer
+from src.plastic_id.utils.timer import Timer
 
 
 def merge_dataframes(dfs: list[pd.DataFrame]) -> pd.DataFrame:
@@ -91,7 +91,7 @@ def main(config_path: str):
     summary_csv = cfg['data']['summary_path']
     os.makedirs(os.path.dirname(out_csv), exist_ok=True)
     processed.to_csv(out_csv, index=False)
-    print(f"🔄 Saved processed data to {out_csv}")
+    print(f"Saved processed data to {out_csv}")
 
     # 5) Save summary counts
     counts = (
@@ -101,7 +101,7 @@ def main(config_path: str):
         .reset_index(name='Count')
     )
     counts.to_csv(summary_csv, index=False)
-    print(f"📊 Saved summary counts to {summary_csv}")
+    print(f"Saved summary counts to {summary_csv}")
 
 
 if __name__ == "__main__":

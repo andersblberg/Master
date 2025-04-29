@@ -37,7 +37,7 @@ def train_nn_model(X, y):
     
     # Initialize the MLPClassifier with the desired hyperparameters.
     model = MLPClassifier(
-        hidden_layer_sizes=(64, 32),
+        hidden_layer_sizes=(256, 256, 256),
         activation='relu',
         solver='adam',
         max_iter=500,

@@ -29,6 +29,7 @@ except ModuleNotFoundError:
 REGISTRY: Dict[str, Callable[[dict[str, Any]], object]] = {
     # plain baselines ---------------------------------------------------------
     "rf":  lambda cfg: RandomForestClassifier(**cfg),
+    "rf_par":  lambda cfg: RandomForestClassifier(n_jobs=-1, **cfg),
     "et":  lambda cfg: ExtraTreesClassifier(**cfg),
     "mlp": lambda cfg: MLPClassifier(**cfg),
     "svm": lambda cfg: SVC(probability=True, **cfg),          # default SVM

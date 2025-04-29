@@ -1,5 +1,5 @@
 data:
-  csv_path: data/interim/combined_DB22_measurements_sorted.csv
+  csv_path: data/interim/combined_DB22_measurements_sorted_clean.csv
 model:
   name: rf        # will be overridden from CLI
   params: {}      # leave empty – we’ll fill from per‑model file

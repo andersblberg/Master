@@ -26,6 +26,8 @@ from plastic_id.data.datasets import PlasticDataset
 from plastic_id.models import get_model
 from plastic_id.utils.timer import timed
 
+from plastic_id.evaluation.noise import add_gaussian_noise
+
 app = typer.Typer(help="Plastic‑ID ML toolkit", add_completion=False)
 
 
@@ -55,47 +57,111 @@ def default(ctx: typer.Context):
 # --------------------------------------------------------------------------- #
 # internal helper                                                             #
 # --------------------------------------------------------------------------- #
-def _run_core(cfg: dict, *, noise_pct: float | None = None) -> dict:
-    """Train & evaluate once, return a dict of metrics."""
+# def _run_core(cfg: dict, *, noise_pct: float | None = None) -> dict:
+#     """Train & evaluate once, return a dict of metrics."""
+#     ds = PlasticDataset(Path(cfg["data"]["csv_path"]))
+#     X_train, X_test = ds.X_train, ds.X_test
+
+#     if noise_pct is not None:
+#         from plastic_id.evaluation.noise import add_gaussian_noise
+#         X_train = add_gaussian_noise(X_train, noise_pct)
+#         X_test  = add_gaussian_noise(X_test,  noise_pct)
+
+#     model = get_model(cfg["model"]["name"], cfg["model"]["params"])
+
+#     # -------- fit / predict ---------------------------------------------------
+#     if cfg["model"]["name"].startswith("xgb"):
+#         le = LabelEncoder().fit(ds.y_train)
+#         y_train_enc = le.transform(ds.y_train)
+#         with timed("fit"):
+#             model.fit(X_train, y_train_enc)
+#         with timed("predict"):
+#             y_pred_enc = model.predict(X_test)
+#         y_pred = le.inverse_transform(y_pred_enc)
+#     else:
+#         with timed("fit"):
+#             model.fit(X_train, ds.y_train)
+#         with timed("predict"):
+#             y_pred = model.predict(X_test)
+#     # -------------------------------------------------------------------------
+
+#     metrics = compute_metrics(ds.y_test, y_pred)
+#     typer.echo(pretty_report(ds.y_test, y_pred))      # nice table
+
+#     tag = cfg["model"]["name"]           # e.g. "rf", "xgb", …
+#     save_model(model, tag)               # artifacts/<tag>.joblib
+#     save_reports(                     
+#         ds.y_test,
+#         y_pred,
+#         tag,
+#         model=model,
+#         X_test=X_test,
+#     )
+#     return metrics
+# --------------------------------------------------------------------------- #
+
+def _run_core(cfg: dict) -> dict:
     ds = PlasticDataset(Path(cfg["data"]["csv_path"]))
     X_train, X_test = ds.X_train, ds.X_test
-
-    if noise_pct is not None:
+    y_train, y_test = ds.y_train, ds.y_test
+    
+    # ------------------------------------------------------------------
+    # Inject noise only in the held-out test split if requested         # <--- NEW
+    # ------------------------------------------------------------------
+    if "eval_noise" in cfg:
         from plastic_id.evaluation.noise import add_gaussian_noise
-        X_train = add_gaussian_noise(X_train, noise_pct)
-        X_test  = add_gaussian_noise(X_test,  noise_pct)
+        pct  = cfg["eval_noise"].get("pct", 0.0)
+        seed = cfg["eval_noise"].get("rng", None)
+        X_test = add_gaussian_noise(X_test, pct, seed)
+    # ------------------------------------------------------------------
+
+    # ------------------------------------------------------------------
+    # Ablate (drop) one or more wavelengths on TEST ONLY if requested
+    # ------------------------------------------------------------------
+    if "eval_ablation" in cfg:
+        from plastic_id.evaluation.ablation import drop_channels
+        # chans = cfg["eval_ablation"]["channels"]
+        chans = cfg["eval_ablation"]["channels"]
+        # allow the special keywords injected by interactive_runner
+        if chans == "SINGLES":
+            from plastic_id.evaluation.ablation import CHANNEL_IDX
+            chans = [[c] for c in CHANNEL_IDX]                 # list of singletons
+        elif chans == "PAIRS":
+            from plastic_id.evaluation.ablation import CHANNEL_IDX
+            from itertools import combinations
+            chans = list(combinations(CHANNEL_IDX, 2))         # list of tuples
+        X_train = drop_channels(X_train, chans)
+        X_test  = drop_channels(X_test,  chans)
+    # ------------------------------------------------------------------
 
     model = get_model(cfg["model"]["name"], cfg["model"]["params"])
 
-    # -------- fit / predict ---------------------------------------------------
+    # -- proceed with fitting & predicting --
     if cfg["model"]["name"].startswith("xgb"):
-        le = LabelEncoder().fit(ds.y_train)
-        y_train_enc = le.transform(ds.y_train)
-        with timed("fit"):
-            model.fit(X_train, y_train_enc)
-        with timed("predict"):
-            y_pred_enc = model.predict(X_test)
+        le = LabelEncoder().fit(y_train)
+        y_train_enc = le.transform(y_train)
+        model.fit(X_train, y_train_enc)
+        y_pred_enc = model.predict(X_test)
         y_pred = le.inverse_transform(y_pred_enc)
     else:
-        with timed("fit"):
-            model.fit(X_train, ds.y_train)
-        with timed("predict"):
-            y_pred = model.predict(X_test)
-    # -------------------------------------------------------------------------
+        model.fit(X_train, y_train)
+        y_pred = model.predict(X_test)
 
-    metrics = compute_metrics(ds.y_test, y_pred)
-    typer.echo(pretty_report(ds.y_test, y_pred))      # nice table
+    metrics = compute_metrics(y_test, y_pred)
+    typer.echo(pretty_report(y_test, y_pred))
 
-    tag = cfg["model"]["name"]           # e.g. "rf", "xgb", …
-    save_model(model, tag)               # artifacts/<tag>.joblib
-    save_reports(                     
-        ds.y_test,
+    tag = cfg["model"]["name"]
+    save_model(model, tag)
+    save_reports(
+        y_test,
         y_pred,
         tag,
         model=model,
         X_test=X_test,
     )
+
     return metrics
+
 
 
 

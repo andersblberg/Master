@@ -19,6 +19,13 @@ from sklearn.metrics import (
     precision_recall_curve,
 )
 
+# ── default axis labels for 8-channel spectra ──────────────────────────────
+DEFAULT_WAVE_LABELS = [
+    "940 nm", "1050 nm", "1200 nm", "1300 nm",
+    "1450 nm", "1550 nm", "1650 nm", "1720 nm",
+]
+
+
 # local helpers ---------------------------------------------------------------
 from .metrics import compute_metrics, precision_recall_per_class
 
@@ -110,6 +117,7 @@ def save_reports(
     *,
     model=None,
     X_test: np.ndarray | None = None,
+    wave_labels: list[str] | None = None,
 ) -> None:
     """
     Persist *all* evaluation artefacts for one run in its dedicated folder:
@@ -136,22 +144,30 @@ def save_reports(
     cls_df.to_csv(run_dir / "per_class_metrics.csv", index=False)
 
     # 4) feature importance (if available) ------------------------------------
+    # if model is not None:
+    #     _maybe_save_feature_importance(
+    #         model,
+    #         run_dir,
+    #         tag=tag,
+    #         wave_labels=[
+    #             "940 nm",
+    #             "1050 nm",
+    #             "1200 nm",
+    #             "1300 nm",
+    #             "1450 nm",
+    #             "1550 nm",
+    #             "1650 nm",
+    #             "1720 nm",
+    #         ],
+    #     )
     if model is not None:
         _maybe_save_feature_importance(
             model,
             run_dir,
             tag=tag,
-            wave_labels=[
-                "940 nm",
-                "1050 nm",
-                "1200 nm",
-                "1300 nm",
-                "1450 nm",
-                "1550 nm",
-                "1650 nm",
-                "1720 nm",
-            ],
+            wave_labels=wave_labels or DEFAULT_WAVE_LABELS,
         )
+
 
     # 5) PR curves (needs predict_proba) --------------------------------------
     if (

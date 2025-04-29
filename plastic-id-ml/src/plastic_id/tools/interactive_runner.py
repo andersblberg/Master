@@ -19,6 +19,66 @@ from pathlib import Path
 import typer            # Typer is already a dependency
 import yaml             # installed via PyYAML
 
+
+# ─── helper to create a throw-away YAML for ablation ────────────
+import tempfile, json, shutil
+
+_ABL_WAVELENGTHS = [940, 1050, 1200, 1300, 1450, 1550, 1650, 1720]
+
+def _prepare_ablation_cfg(base_cfg_path: str) -> str:
+    """
+    Interactively ask which channels to drop, clone the YAML into a
+    temp file, inject the chosen list under `eval_ablation.channels`,
+    and return the *new* path.
+    """
+    typer.echo("\n  Ablation - choose wavelengths to drop")
+    typer.echo("  [0]  type your own comma-separated list")
+    for i, wv in enumerate(_ABL_WAVELENGTHS, 1):
+        typer.echo(f"  [{i}]  {wv}")
+    typer.echo("  [9]  every single channel (loop)")
+    typer.echo("  [10] every pair of channels (loop)")
+    choice = typer.prompt("Select option", type=int)
+
+    # ── decide the list/loop spec ───────────────────────────────
+    if choice == 0:
+        # chans = [int(x) for x in typer.prompt("Comma-separated wavelengths").split(",")]
+        raw = [int(x) for x in typer.prompt(
+            "Comma-separated list (index 1-8 or wavelength)").split(",")]
+        # translate 1-8 → wavelengths; leave real wavelengths untouched
+
+        chans: list[int] = []
+        for val in raw:
+            if 1 <= val <= 8:                   # menu index → wavelength
+                chans.append(_ABL_WAVELENGTHS[val - 1])
+            elif val in _ABL_WAVELENGTHS:       # already a wavelength
+                chans.append(val)
+            else:
+                # ── graceful error and exit ───────────────────────────
+                typer.secho(
+                    f"  ✘  '{val}' is neither 1-8 nor a valid wavelength "
+                    f"({_ABL_WAVELENGTHS}).  Aborted.",
+                    fg=typer.colors.RED,
+                    err=True,
+                )
+                raise typer.Exit(1)
+    elif 1 <= choice <= 8:
+        chans = [_ABL_WAVELENGTHS[choice - 1]]
+    elif choice == 9:
+        chans = "SINGLES"
+    elif choice == 10:
+        chans = "PAIRS"
+    else:
+        typer.secho(" Invalid choice – aborted.", fg=typer.colors.RED); raise typer.Exit(1)
+
+    # ── clone YAML and inject field ─────────────────────────────
+    cfg = yaml.safe_load(Path(base_cfg_path).read_text())
+    cfg["eval_ablation"] = {"channels": chans}
+    tmp = Path(tempfile.mkstemp(suffix=".yaml", prefix="abl_")[1])
+    tmp.write_text(yaml.dump(cfg, sort_keys=False))
+    return str(tmp)
+
+
+
 # ───────────────────────────────────────────────────────────────
 # 1  Discover datasets
 # ───────────────────────────────────────────────────────────────
@@ -56,10 +116,10 @@ def run() -> None:
         raise typer.Exit(1)
 
     # ── dataset prompt ─────────────────────────────────────────
-    typer.echo("\n  Available datasets")
+    typer.echo("\n  Configurations")
     for i, name in enumerate(datasets, 1):
         typer.echo(f"  [{i}]  {name}")
-    ds_idx = typer.prompt("Select dataset number", type=int)
+    ds_idx = typer.prompt("Select configuration number", type=int)
 
     try:
         ds_name  = list(datasets.keys())[ds_idx - 1]
@@ -97,6 +157,10 @@ def run() -> None:
         raise typer.Exit(1)
 
     models = [m + suffix for m in models_base]
+
+    # ── ablation: replace cfg file on the fly if needed ─────────
+    if ds_name == "ablation":
+        cfg_file = _prepare_ablation_cfg(cfg_file)
 
     # ── build & launch command ─────────────────────────────────
     cmd: list[str] = (

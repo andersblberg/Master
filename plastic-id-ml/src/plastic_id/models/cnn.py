@@ -25,14 +25,21 @@ N_CLASSES:  Final[int] = 6            # HDPE, LDPE, …, PVC
 class _Net(nn.Module):
     def __init__(self):
         super().__init__()
-        self.fc1 = nn.Linear(N_FEATURES, 64)
-        self.fc2 = nn.Linear(64, 32)
-        self.out = nn.Linear(32, N_CLASSES)
+        # 1-D convolution along the wavelength axis
+        self.conv1 = nn.Conv1d(in_channels=1, out_channels=16,
+                               kernel_size=3, padding=1)
+        self.conv2 = nn.Conv1d(in_channels=16, out_channels=32,
+                               kernel_size=3, padding=1)
+
+        # flatten → linear classifier
+        self.out   = nn.Linear(32 * N_FEATURES, N_CLASSES)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        return self.out(x)
+        x = x.unsqueeze(1)          # (batch, channels=1, 8)
+        x = F.relu(self.conv1(x))   # (batch, 16, 8)
+        x = F.relu(self.conv2(x))   # (batch, 32, 8)
+        x = x.view(x.size(0), -1)   # flatten: (batch, 32*8)
+        return self.out(x)          # logits for N_CLASSES
 
 
 # ───────────────────────── wrapper: scikit-learn style ───────────────────────

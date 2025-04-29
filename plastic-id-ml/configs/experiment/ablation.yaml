@@ -1,0 +1,14 @@
+data:
+  csv_path: data/interim/combined_DB22_measurements_sorted_clean.csv
+
+model:
+  name: rf            # overridden from CLI as usual
+  params: {}
+
+eval_ablation:
+  channels: [1450, 1550]   # drop one or more wavelengths (nm)
+
+# (optional) combine with noise
+# eval_noise:
+#   pct: 5                 # ±5 % Gaussian
+#   rng: 123               # fixed seed for reproducibility
