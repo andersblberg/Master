@@ -10,5 +10,5 @@ model:
 
 # NEW – interpreted only by the patch above
 eval_noise:
-  pct: 10.0               # 3 % of each value as σ
+  pct: 30.0               # 3 % of each value as σ
   rng: 42                # fixed seed so runs are repeatable

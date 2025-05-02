@@ -102,9 +102,9 @@ def _maybe_save_feature_importance(
 # --------------------------------------------------------------------------- #
 # public helpers (used from cli.py)
 # --------------------------------------------------------------------------- #
-def save_model(model, tag: str) -> Path:
-    """Dump the fitted estimator as <run_dir>/model.joblib and return the path."""
-    run_dir = _run_dir(tag)
+def save_model(model, tag: str, *, run_dir: Path | None = None) -> Path:
+    if run_dir is None:                               # NEW
+        run_dir = _run_dir(tag)                       # NEW
     path = run_dir / "model.joblib"
     joblib.dump(model, path)
     return path
@@ -114,6 +114,7 @@ def save_reports(
     y_true,
     y_pred,
     tag: str,
+    run_dir: Path | None = None,
     *,
     model=None,
     X_test: np.ndarray | None = None,
@@ -128,7 +129,7 @@ def save_reports(
     ├─ feature_importance.png     (tree models only)
     └─ PR_curve_<class>.png       (one per class if predict_proba available)
     """
-    run_dir = _run_dir(tag)
+    run_dir = run_dir or _run_dir(tag)
 
     # 1) confusion matrix ------------------------------------------------------
     cm_fig = _make_cm_plot(y_true, y_pred, labels=np.unique(y_true))
@@ -188,3 +189,8 @@ def save_reports(
             plt.tight_layout()
             plt.savefig(run_dir / f"PR_curve_{lab}.png", dpi=300)
             plt.close()
+
+# --------------------------------------------------------------------------- #
+# make the run-directory helper importable from cli.py
+# --------------------------------------------------------------------------- #
+__all__ = ["_run_dir", "save_model", "save_reports"]

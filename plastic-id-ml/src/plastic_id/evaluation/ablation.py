@@ -6,6 +6,7 @@ CHANNEL_IDX = {
 }
 
 def drop_channels(X: np.ndarray, channels):
+    _validate_channels(channels) # for cv
     idx = [CHANNEL_IDX[w] for w in channels]
     return np.delete(X, idx, axis=1)
 
@@ -16,3 +17,11 @@ def gen_single_drop():
 def gen_pair_drop():
     for pair in combinations(CHANNEL_IDX, 2):
         yield (pair, lambda X, pair=pair: drop_channels(X, pair))
+        
+def _validate_channels(channels):
+    unknown = [c for c in channels if c not in CHANNEL_IDX]
+    if unknown:
+        raise ValueError(
+            f"Ablation: unknown wavelength(s) {unknown}. "
+            f"Valid: {sorted(CHANNEL_IDX)}"
+        )

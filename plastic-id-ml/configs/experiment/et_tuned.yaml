@@ -1,0 +1,12 @@
+data:
+  csv_path: data\interim\combined_DB22_measurements_sorted_clean.csv
+eval_cv:
+  n_splits: 10
+  random_state: 42
+model:
+  name: et
+  params:
+    n_estimators: 500
+    max_depth: 15
+    criterion: gini
+    bootstrap: false

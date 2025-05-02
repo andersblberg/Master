@@ -15,7 +15,7 @@ if ROOT not in sys.path:
 import argparse
 import yaml
 import pandas as pd
-from src.data.loaders import load_raw
+# from src.data.loaders import load_raw
 from src.plastic_id.utils.timer import Timer
 
 

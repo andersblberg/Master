@@ -16,7 +16,7 @@ def train_svm_model(X, y):
         random_state=42,
         stratify=y
     )
-    model = SVC(kernel="rbf", C=1.0, gamma="scale", random_state=42)
+    model = SVC(kernel="rbf", C=10, gamma="scale", random_state=42)
     model.fit(X_train, y_train)
 
     y_pred = model.predict(X_test)
