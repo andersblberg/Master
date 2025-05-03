@@ -2,3 +2,8 @@
 C: 10
 kernel: rbf
 gamma: scale
+
+
+# C: 238.17
+# gamma: 0.0063535
+# kernel: rbf

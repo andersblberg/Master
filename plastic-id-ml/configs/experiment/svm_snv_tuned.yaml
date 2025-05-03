@@ -1,0 +1,13 @@
+data:
+  csv_path: data/interim/combined_DB22_measurements_sorted_clean.csv
+
+model:
+  name: svm_snv          # <<< include the SNV pipeline
+  params:
+    C: 642.0
+    gamma: 0.985
+    kernel: rbf          # (optuna kept the default)
+    
+eval_cv:
+  n_splits: 10
+  random_state: 42

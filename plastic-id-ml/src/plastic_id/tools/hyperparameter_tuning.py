@@ -4,8 +4,7 @@ One-off hyper-parameter tuner for any registry model
 ----------------------------------------------------
 Usage example
 -------------
-poetry run python -m plastic_id.tools.hyperparameter_tuning \
-       --model rf --trials 50 --outfile tuned_rf.yaml
+poetry run python -m plastic_id.tools.hyperparameter_tuning --model rf --trials 50 --outfile tuned_rf.yaml
 """
 from __future__ import annotations
 
@@ -35,18 +34,20 @@ args = parser.parse_args()
 # ------------------------------------------------------------------ #
 ds = PlasticDataset(Path(args.csv))
 X, y = ds.X, ds.y
-kf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+kf = StratifiedKFold(n_splits=10, shuffle=True, random_state=42)
 
 # ------------------------------------------------------------------ #
 # Search spaces for a few common models
 # ------------------------------------------------------------------ #
 def rf_space(trial):
     return {
-        "n_estimators": trial.suggest_int("n_estimators", 100, 1000, step=100),
-        "max_depth": trial.suggest_int("max_depth", 5, 50, step=5) | None,
-        "criterion": trial.suggest_categorical("criterion", ["gini", "entropy", "log_loss"]),
-        "class_weight": "balanced",
-        "random_state": 42,
+        "n_estimators": trial.suggest_int("n_estimators", 200, 900, step=100),
+        # allow “no limit” by explicitly listing None
+        "max_depth":    trial.suggest_categorical(
+            "max_depth", [None] + list(range(5, 55, 5))
+        ),
+        "criterion": trial.suggest_categorical("criterion", ["gini", "entropy"]),
+        "bootstrap": trial.suggest_categorical("bootstrap", [True, False]),
     }
 
 def et_space(trial):
@@ -66,18 +67,21 @@ def et_space(trial):
     }
 
 def svm_space(trial):
+    """
+    log-scale grid for C and gamma, kernel kept at default "rbf".
+    """
+    C     = 10 ** trial.suggest_float("logC",     -1, 3)   # 0.1 … 1000
+    gamma = 10 ** trial.suggest_float("logGamma", -4, 0)   # 1e-4 … 1
     return {
-        "C": 10 ** trial.suggest_float("logC", -2, 2),
-        "gamma": 10 ** trial.suggest_float("logGamma", -4, 1),
-        "kernel": "rbf",
-        "probability": True,
+        "C":     C,
+        "gamma": gamma,
     }
 
 SPACE = {
     "rf": rf_space,
     "rf_par": rf_space,
     "et": et_space,
-    "svm": svm_space,
+    "svm_snv": svm_space,
 }
 
 if args.model not in SPACE:
@@ -112,4 +116,4 @@ out_dict = {
     "model": {"name": args.model, "params": best_params},
 }
 args.outfile.write_text(yaml.dump(out_dict, sort_keys=False))
-print(f"→ wrote tuned config to {args.outfile}")
+print(f"wrote tuned config to {args.outfile}")

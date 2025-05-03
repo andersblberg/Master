@@ -5,7 +5,7 @@ data:
   csv_path: data/interim/combined_DB22_measurements_sorted_clean.csv
 
 # ---------------------------------------------------------------------
-# Model (you can change these as usual from the CLI)
+# Model (these are changed from the CLI)
 # ---------------------------------------------------------------------
 model:
   name: et

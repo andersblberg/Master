@@ -515,7 +515,7 @@ def _run_core(cfg: dict) -> dict:
     # =================================================================
     if "eval_cv" in cfg:
         cv_cfg = cfg["eval_cv"] or {}
-        k      = cv_cfg.get("n_splits", 5)
+        k      = cv_cfg.get("n_splits", 10)
         kf = StratifiedKFold(
             n_splits=k,
             shuffle=True,
