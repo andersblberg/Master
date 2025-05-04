@@ -1,14 +1,14 @@
 <!-- ![Plastic-ID-ML: NIR Spectral ML Test-bed](docs/img/banner.png) -->
 
   <img src="docs/img/banner.png" alt="Plastic-ID-ML banner" width="600">
-*Infrared spectral data classification of polymers with Python & ML*
+## Infrared spectral data classification of polymers with Python & ML*
 
 
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 This repo contains all the code, configs and utilities developed and used in my M.Sc.-thesis
-work on **classifying polymers (HDPE, LDPE, PET, PP, PS, PVC, …)**
+work on **evaluating ML model performance on classifying polymers (HDPE, LDPE, PET, PP, PS, PVC, …)**
 from their near-infra-red / FT-IR spectra derived from the [![Plastic-Scanner](https://github.com/Plastic-Scanner)] project.
 
 | **Highlights** | |
