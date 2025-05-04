@@ -15,10 +15,10 @@ from itertools import combinations
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import (
-        f1_score,
-        precision_score,
-        recall_score,
-    )
+    f1_score,
+    precision_score,
+    recall_score,
+)
 
 import matplotlib.pyplot as plt
 from plastic_id.preprocessing import RowNormalizer, RowSNV, make_pca
@@ -39,18 +39,14 @@ from plastic_id.evaluation.noise import add_gaussian_noise
 app = typer.Typer(help="Plastic‑ID ML toolkit", add_completion=False)
 
 
-
-
 def _fill_params_if_empty(cfg: dict):
     """Populate cfg.model.params from configs/model/<name>.yaml if missing/None."""
     if cfg["model"].get("params"):
-        return  
-    cfg["model"]["params"] = {}  
+        return
+    cfg["model"]["params"] = {}
     param_file = Path(f"configs/model/{cfg['model']['name']}.yaml")
     if param_file.exists():
-        cfg["model"]["params"].update(
-            yaml.safe_load(param_file.read_text()) or {}
-        )
+        cfg["model"]["params"].update(yaml.safe_load(param_file.read_text()) or {})
 
 
 @app.callback(invoke_without_command=True)
@@ -98,7 +94,7 @@ def default(ctx: typer.Context):
 
 #     tag = cfg["model"]["name"]           # e.g. "rf", "xgb", …
 #     save_model(model, tag)               # artifacts/<tag>.joblib
-#     save_reports(                     
+#     save_reports(
 #         ds.y_test,
 #         y_pred,
 #         tag,
@@ -112,7 +108,7 @@ def default(ctx: typer.Context):
 #     ds = PlasticDataset(Path(cfg["data"]["csv_path"]))
 #     X_train, X_test = ds.X_train, ds.X_test
 #     y_train, y_test = ds.y_train, ds.y_test
-    
+
 #     # ------------------------------------------------------------------
 #     # Inject noise only in the held-out test split if requested         # <--- NEW
 #     # ------------------------------------------------------------------
@@ -140,7 +136,7 @@ def default(ctx: typer.Context):
 #             chans = list(combinations(CHANNEL_IDX, 2))         # list of tuples
 #         X_train = drop_channels(X_train, chans)
 #         X_test  = drop_channels(X_test,  chans)
-    
+
 #         # --- keep feature-name list in sync with the data -------------
 #         from plastic_id.data.datasets import FEATURE_COLUMNS
 #         kept_names = [
@@ -292,7 +288,6 @@ def default(ctx: typer.Context):
 #     return metrics
 
 
-
 # ─────────────────────────────────────────────────────────────────────────────
 # core: old
 # ─────────────────────────────────────────────────────────────────────────────
@@ -301,7 +296,7 @@ def default(ctx: typer.Context):
 #     Either run the classic 80 / 20 train-test split **or** a k-fold
 #     cross-validation cycle (if the YAML contains an `eval_cv:` stanza).
 
-#     – Noise is always injected **only** into the current *test* partition  
+#     – Noise is always injected **only** into the current *test* partition
 #     – Ablation (dropping wavelengths) hits *both* train & test partitions
 #     """
 
@@ -490,8 +485,9 @@ def default(ctx: typer.Context):
 
 #     return metrics
 
-#From here
+# From here
 ####
+
 
 # ------------------------------------------------------------------ #
 # single run (hold-out  or  k-fold CV)
@@ -503,7 +499,7 @@ def _run_core(cfg: dict) -> dict:
 
     Semantics shared by both modes
     ──────────────────────────────
-    – test-noise is injected **only** into the current test partition  
+    – test-noise is injected **only** into the current test partition
     – ablation (dropping wavelengths) is applied to BOTH train & test
     """
 
@@ -515,7 +511,7 @@ def _run_core(cfg: dict) -> dict:
     # =================================================================
     if "eval_cv" in cfg:
         cv_cfg = cfg["eval_cv"] or {}
-        k      = cv_cfg.get("n_splits", 10)
+        k = cv_cfg.get("n_splits", 10)
         kf = StratifiedKFold(
             n_splits=k,
             shuffle=True,
@@ -537,6 +533,7 @@ def _run_core(cfg: dict) -> dict:
                     drop_channels,
                     CHANNEL_IDX,
                 )
+
                 chans = cfg["eval_ablation"]["channels"]
                 if chans == "SINGLES":
                     chans = [[c] for c in CHANNEL_IDX]
@@ -544,12 +541,13 @@ def _run_core(cfg: dict) -> dict:
                     chans = list(combinations(CHANNEL_IDX, 2))
 
                 X_train = drop_channels(X_train, chans)
-                X_test  = drop_channels(X_test,  chans)
+                X_test = drop_channels(X_test, chans)
 
             # ---- optional gaussian noise on TEST only ----------------
             if "eval_noise" in cfg:
                 from plastic_id.evaluation.noise import add_gaussian_noise
-                pct  = cfg["eval_noise"].get("pct", 0.0)
+
+                pct = cfg["eval_noise"].get("pct", 0.0)
                 seed = cfg["eval_noise"].get("rng", None)
                 X_test = add_gaussian_noise(X_test, pct, seed)
 
@@ -567,10 +565,10 @@ def _run_core(cfg: dict) -> dict:
             y_true_all.extend(y_test)
             y_pred_all.extend(y_pred)
 
-            fold_acc .append((y_pred == y_test).mean())
-            fold_f1  .append(f1_score      (y_test, y_pred, average="macro"))
+            fold_acc.append((y_pred == y_test).mean())
+            fold_f1.append(f1_score(y_test, y_pred, average="macro"))
             fold_prec.append(precision_score(y_test, y_pred, average="macro"))
-            fold_rec .append(recall_score  (y_test, y_pred, average="macro"))
+            fold_rec.append(recall_score(y_test, y_pred, average="macro"))
 
         # ========== pooled report (all folds together) ================
         y_true_all = np.asarray(y_true_all)
@@ -579,7 +577,7 @@ def _run_core(cfg: dict) -> dict:
         typer.echo(pretty_report(y_true_all, y_pred_all))
 
         # ---------- artefacts: SINGLE folder --------------------------
-        tag     = cfg["model"]["name"] + "_cv"
+        tag = cfg["model"]["name"] + "_cv"
         run_dir = _run_dir(tag)
 
         # pooled CM + metrics, per-class etc.
@@ -587,7 +585,7 @@ def _run_core(cfg: dict) -> dict:
             y_true_all,
             y_pred_all,
             tag,
-            model=None,          # no single fold model
+            model=None,  # no single fold model
             X_test=None,
             run_dir=run_dir,
         )
@@ -595,25 +593,25 @@ def _run_core(cfg: dict) -> dict:
         # fold-level CSV + JSON
         pd.DataFrame(
             {
-                "fold":      np.arange(1, k + 1),
-                "accuracy":  fold_acc,
-                "f1_macro":  fold_f1,
+                "fold": np.arange(1, k + 1),
+                "accuracy": fold_acc,
+                "f1_macro": fold_f1,
                 "precision": fold_prec,
-                "recall":    fold_rec,
+                "recall": fold_rec,
             }
         ).to_csv(run_dir / "cv_fold_scores.csv", index=False)
 
         (run_dir / "cv_mean_std.json").write_text(
             json.dumps(
                 {
-                    "accuracy_mean":   float(np.mean(fold_acc)),
-                    "accuracy_std":    float(np.std (fold_acc)),
-                    "f1_macro_mean":   float(np.mean(fold_f1)),
-                    "f1_macro_std":    float(np.std (fold_f1)),
-                    "precision_mean":  float(np.mean(fold_prec)),
-                    "precision_std":   float(np.std (fold_prec)),
-                    "recall_mean":     float(np.mean(fold_rec)),
-                    "recall_std":      float(np.std (fold_rec)),
+                    "accuracy_mean": float(np.mean(fold_acc)),
+                    "accuracy_std": float(np.std(fold_acc)),
+                    "f1_macro_mean": float(np.mean(fold_f1)),
+                    "f1_macro_std": float(np.std(fold_f1)),
+                    "precision_mean": float(np.mean(fold_prec)),
+                    "precision_std": float(np.std(fold_prec)),
+                    "recall_mean": float(np.mean(fold_rec)),
+                    "recall_std": float(np.std(fold_rec)),
                 },
                 indent=2,
             )
@@ -624,6 +622,7 @@ def _run_core(cfg: dict) -> dict:
         full_X, full_y = ds.X.copy(), ds.y.copy()
         if "eval_ablation" in cfg:
             from plastic_id.evaluation.ablation import drop_channels, CHANNEL_IDX
+
             chans = cfg["eval_ablation"]["channels"]
             if chans == "SINGLES":
                 chans = [[c] for c in CHANNEL_IDX]
@@ -641,7 +640,11 @@ def _run_core(cfg: dict) -> dict:
         save_model(full_model, tag, run_dir=run_dir)
 
         # tree models → feature importance plot
-        from plastic_id.evaluation import _maybe_save_feature_importance, DEFAULT_WAVE_LABELS
+        from plastic_id.evaluation import (
+            _maybe_save_feature_importance,
+            DEFAULT_WAVE_LABELS,
+        )
+
         _maybe_save_feature_importance(
             full_model,
             run_dir,
@@ -650,10 +653,10 @@ def _run_core(cfg: dict) -> dict:
         )
 
         # ---------- console summary -----------------------------------
-        acc_arr  = np.asarray(fold_acc)
-        f1_arr   = np.asarray(fold_f1)
+        acc_arr = np.asarray(fold_acc)
+        f1_arr = np.asarray(fold_f1)
         prec_arr = np.asarray(fold_prec)
-        rec_arr  = np.asarray(fold_rec)
+        rec_arr = np.asarray(fold_rec)
 
         typer.echo(
             f"\n{k}-fold CV summary\n"
@@ -665,10 +668,10 @@ def _run_core(cfg: dict) -> dict:
 
         # numbers returned to interactive_runner’s summary table
         return {
-            "accuracy":  acc_arr.mean(),
-            "f1_macro":  f1_arr.mean(),
+            "accuracy": acc_arr.mean(),
+            "f1_macro": f1_arr.mean(),
             "precision": prec_arr.mean(),
-            "recall":    rec_arr.mean(),
+            "recall": rec_arr.mean(),
         }
 
     # =================================================================
@@ -680,18 +683,20 @@ def _run_core(cfg: dict) -> dict:
     # optional ablation
     if "eval_ablation" in cfg:
         from plastic_id.evaluation.ablation import drop_channels, CHANNEL_IDX
+
         chans = cfg["eval_ablation"]["channels"]
         if chans == "SINGLES":
             chans = [[c] for c in CHANNEL_IDX]
         elif chans == "PAIRS":
             chans = list(combinations(CHANNEL_IDX, 2))
         X_train = drop_channels(X_train, chans)
-        X_test  = drop_channels(X_test,  chans)
+        X_test = drop_channels(X_test, chans)
 
     # optional noise on TEST only
     if "eval_noise" in cfg:
         from plastic_id.evaluation.noise import add_gaussian_noise
-        pct  = cfg["eval_noise"].get("pct", 0.0)
+
+        pct = cfg["eval_noise"].get("pct", 0.0)
         seed = cfg["eval_noise"].get("rng", None)
         X_test = add_gaussian_noise(X_test, pct, seed)
 
@@ -720,8 +725,6 @@ def _run_core(cfg: dict) -> dict:
     return compute_metrics(y_test, y_pred)
 
 
-
-
 # --------------------------------------------------------------------------- #
 # commands                                                                    #
 # --------------------------------------------------------------------------- #
@@ -731,7 +734,7 @@ def run(
     model: Optional[str] = typer.Argument(
         None,  # default = use whatever the YAML says
         help="Model key (rf, svm, mlp, et, xgb). "
-             "If omitted, model will be read from the YAML."
+        "If omitted, model will be read from the YAML.",
     ),
     cfg_path: Path = typer.Option(
         Path("configs/experiment/baseline.yaml"), exists=True
@@ -744,7 +747,6 @@ def run(
 
     res = _run_core(cfg)
     typer.echo(json.dumps({"model": cfg["model"]["name"], **res}, indent=2))
-
 
 
 @app.command()
@@ -770,6 +772,7 @@ def noise(
         acc = _run_core(cfg, noise_pct=p)["accuracy"]
         typer.echo(f"±{p}% → {acc:.3f}  (Δ {acc - base:+.3f})")
 
+
 @app.command()
 def grid(
     models: List[str] = typer.Option(
@@ -778,10 +781,13 @@ def grid(
         "-m",
         help="One or more model keys",
     ),
-    cfg_path: Path = typer.Option(Path("configs/experiment/baseline.yaml"), exists=True),
+    cfg_path: Path = typer.Option(
+        Path("configs/experiment/baseline.yaml"), exists=True
+    ),
 ):
     """Train/eval several models and print a summary table."""
     import pandas as pd
+
     rows = []
     for m in models:
         typer.echo(f"\n── {m.upper()} ─────────────────────────────────")
@@ -794,33 +800,28 @@ def grid(
     df = pd.DataFrame(rows).set_index("model").sort_values("accuracy", ascending=False)
     typer.echo(df.to_markdown())
 
+
 # --------------------------------------------------------------------------- #
 # visualisation                                                               #
 # --------------------------------------------------------------------------- #
 @app.command()
 def viz(
-    type: str = typer.Option(
-        "raw",
-        help="raw | norm | snv | pca20 | pca40 | pca80"
-    ),
-    rows: int = typer.Option(
-        30, help="How many random spectra to draw"
-    ),
+    type: str = typer.Option("raw", help="raw | norm | snv | pca20 | pca40 | pca80"),
+    rows: int = typer.Option(30, help="How many random spectra to draw"),
     csv_path: Path = typer.Option(
-        Path("data/interim/combined_DB22_measurements_sorted.csv"),
-        exists=True
+        Path("data/interim/combined_DB22_measurements_sorted.csv"), exists=True
     ),
 ):
     """Quick look at transformed spectra / PCA scores."""
     ds = PlasticDataset(csv_path)
-    X = ds.X_train[:rows, :]      # take first N for speed
+    X = ds.X_train[:rows, :]  # take first N for speed
 
     if type == "norm":
         X = RowNormalizer().fit_transform(X)
     elif type == "snv":
         X = RowSNV().fit_transform(X)
     elif type.startswith("pca"):
-        n = int(type[3:])          # grabs 20 / 40 / 80
+        n = int(type[3:])  # grabs 20 / 40 / 80
         X = make_pca(n).fit_transform(X)
     elif type != "raw":
         typer.echo(f"Unknown --type {type}", err=True)

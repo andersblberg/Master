@@ -4,6 +4,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 
+
 def train_rf_model(X, y):
     """
     Trains a Random Forest classifier on the provided feature matrix X and labels y.
@@ -16,7 +17,4 @@ def train_rf_model(X, y):
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
     acc = accuracy_score(y_test, y_pred)
-    return {
-        "model": model,
-        "accuracy": acc
-    }
+    return {"model": model, "accuracy": acc}

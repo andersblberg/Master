@@ -21,8 +21,14 @@ from sklearn.metrics import (
 
 # ── default axis labels for 8-channel spectra ──────────────────────────────
 DEFAULT_WAVE_LABELS = [
-    "940 nm", "1050 nm", "1200 nm", "1300 nm",
-    "1450 nm", "1550 nm", "1650 nm", "1720 nm",
+    "940 nm",
+    "1050 nm",
+    "1200 nm",
+    "1300 nm",
+    "1450 nm",
+    "1550 nm",
+    "1650 nm",
+    "1720 nm",
 ]
 
 
@@ -61,9 +67,7 @@ def _make_cm_plot(
         cmap="Blues",
         colorbar=False,
     )
-    disp.ax_.set_xticklabels(
-        disp.ax_.get_xticklabels(), rotation=45, ha="right"
-    )
+    disp.ax_.set_xticklabels(disp.ax_.get_xticklabels(), rotation=45, ha="right")
 
     # annotate each cell with the count
     for (i, j), v in np.ndenumerate(disp.confusion_matrix):
@@ -103,8 +107,8 @@ def _maybe_save_feature_importance(
 # public helpers (used from cli.py)
 # --------------------------------------------------------------------------- #
 def save_model(model, tag: str, *, run_dir: Path | None = None) -> Path:
-    if run_dir is None:                               # NEW
-        run_dir = _run_dir(tag)                       # NEW
+    if run_dir is None:  # NEW
+        run_dir = _run_dir(tag)  # NEW
     path = run_dir / "model.joblib"
     joblib.dump(model, path)
     return path
@@ -169,13 +173,8 @@ def save_reports(
             wave_labels=wave_labels or DEFAULT_WAVE_LABELS,
         )
 
-
     # 5) PR curves (needs predict_proba) --------------------------------------
-    if (
-        model is not None
-        and X_test is not None
-        and hasattr(model, "predict_proba")
-    ):
+    if model is not None and X_test is not None and hasattr(model, "predict_proba"):
         proba = model.predict_proba(X_test)
         labels = np.unique(y_true)
         for i, lab in enumerate(labels):
@@ -189,6 +188,7 @@ def save_reports(
             plt.tight_layout()
             plt.savefig(run_dir / f"PR_curve_{lab}.png", dpi=300)
             plt.close()
+
 
 # --------------------------------------------------------------------------- #
 # make the run-directory helper importable from cli.py

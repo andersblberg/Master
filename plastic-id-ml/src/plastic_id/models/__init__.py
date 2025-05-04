@@ -15,36 +15,38 @@ from sklearn.svm import SVC
 from plastic_id.preprocessing import RowNormalizer, RowSNV, make_pca
 
 # -------- optional back-ends -----------------------------------
-try:                                          # PyTorch installed?
-    from .cnn import CNNClassifier            # noqa: D
-except Exception:                             # any import failure → disable
-    CNNClassifier = None                      # type: ignore
+try:  # PyTorch installed?
+    from .cnn import CNNClassifier  # noqa: D
+except Exception:  # any import failure → disable
+    CNNClassifier = None  # type: ignore
 
-try:                                          # XGBoost installed?
-    from xgboost import XGBClassifier         # noqa: D
+try:  # XGBoost installed?
+    from xgboost import XGBClassifier  # noqa: D
 except ModuleNotFoundError:
-    XGBClassifier = None                      # type: ignore
+    XGBClassifier = None  # type: ignore
 # ---------------------------------------------------------------
 
 REGISTRY: Dict[str, Callable[[dict[str, Any]], object]] = {
     # plain baselines ---------------------------------------------------------
-    "rf":  lambda cfg: RandomForestClassifier(**cfg),
-    "rf_par":  lambda cfg: RandomForestClassifier(n_jobs=-1, **cfg),
-    "et":  lambda cfg: ExtraTreesClassifier(**cfg),
+    "rf": lambda cfg: RandomForestClassifier(**cfg),
+    "rf_par": lambda cfg: RandomForestClassifier(n_jobs=-1, **cfg),
+    "et": lambda cfg: ExtraTreesClassifier(**cfg),
     "mlp": lambda cfg: MLPClassifier(**cfg),
-    "svm": lambda cfg: SVC(probability=True, **cfg),          # default SVM
+    "svm": lambda cfg: SVC(probability=True, **cfg),  # default SVM
 }
 
 # ─── SVM variants (pipelines) ──────────────────────────────────
 REGISTRY.update(
     {
-        "svm_raw":   lambda c: SVC(probability=True, **c),
-        "svm_norm":  lambda c: make_pipeline(RowNormalizer(), SVC(probability=True, **c)),
-        "svm_snv":   lambda c: make_pipeline(RowSNV(),       SVC(probability=True, **c)),
-        "svm_pca2":  lambda c: make_pipeline(make_pca(2),    SVC(probability=True, **c)),
-        "svm_pca4":  lambda c: make_pipeline(make_pca(4),    SVC(probability=True, **c)),
-        "svm_pca8":  lambda c: make_pipeline(make_pca(8),    SVC(probability=True, **c)),
-        "svm_bal":   lambda c: SVC(probability=True, class_weight="balanced", **c),
+        "svm_raw": lambda c: SVC(probability=True, **c),
+        "svm_norm": lambda c: make_pipeline(
+            RowNormalizer(), SVC(probability=True, **c)
+        ),
+        "svm_snv": lambda c: make_pipeline(RowSNV(), SVC(probability=True, **c)),
+        "svm_pca2": lambda c: make_pipeline(make_pca(2), SVC(probability=True, **c)),
+        "svm_pca4": lambda c: make_pipeline(make_pca(4), SVC(probability=True, **c)),
+        "svm_pca8": lambda c: make_pipeline(make_pca(8), SVC(probability=True, **c)),
+        "svm_bal": lambda c: SVC(probability=True, class_weight="balanced", **c),
         "svm_pca8_bal": lambda c: make_pipeline(
             make_pca(8),
             SVC(probability=True, class_weight="balanced", **c),
@@ -62,8 +64,9 @@ if CNNClassifier is not None:
 # ---------------------------------------------------------------------------
 _SUFFIX_MAP = {
     "_norm": RowNormalizer(),
-    "_snv":  RowSNV(),
+    "_snv": RowSNV(),
 }
+
 
 def get_model(name: str, cfg: dict[str, Any]):
     """
@@ -79,8 +82,9 @@ def get_model(name: str, cfg: dict[str, Any]):
         if name.endswith(suf):
             base_name = name[: -len(suf)]
             if base_name not in REGISTRY:
-                raise ValueError(f"Unknown base model '{base_name}' "
-                                 f"(derived from '{name}')")
+                raise ValueError(
+                    f"Unknown base model '{base_name}' " f"(derived from '{name}')"
+                )
             base_model = REGISTRY[base_name](cfg)
             return make_pipeline(transformer, base_model)
 
@@ -89,6 +93,5 @@ def get_model(name: str, cfg: dict[str, Any]):
         return REGISTRY[name](cfg)
     except KeyError as exc:
         raise ValueError(
-            f"Unknown model key '{name}'. "
-            f"Available: {', '.join(sorted(REGISTRY))}"
+            f"Unknown model key '{name}'. " f"Available: {', '.join(sorted(REGISTRY))}"
         ) from exc

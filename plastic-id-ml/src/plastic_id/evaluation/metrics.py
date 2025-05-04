@@ -16,17 +16,20 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from pathlib import Path
 
+
 def compute_metrics(y_true, y_pred) -> Mapping[str, float]:
     """Return a dict of the core classification metrics."""
     return {
-        "accuracy":  accuracy_score(y_true, y_pred),
-        "f1_macro":  f1_score(y_true, y_pred, average="macro"),
+        "accuracy": accuracy_score(y_true, y_pred),
+        "f1_macro": f1_score(y_true, y_pred, average="macro"),
         "precision": precision_score(y_true, y_pred, average="macro"),
-        "recall":    recall_score(y_true, y_pred, average="macro"),
+        "recall": recall_score(y_true, y_pred, average="macro"),
     }
+
 
 def pretty_report(y_true, y_pred) -> str:
     return classification_report(y_true, y_pred, digits=3)
+
 
 def precision_recall_per_class(
     y_true,
@@ -37,7 +40,7 @@ def precision_recall_per_class(
     """
     Return a DataFrame with precision, recall, f1 and support **per class**.
 
-    Columns:  precision | recall | f1 | support  
+    Columns:  precision | recall | f1 | support
     Index  :  class labels (same dtype as `y_true` / `y_pred`)
     """
     labels = np.unique(np.concatenate([y_true, y_pred]))
@@ -57,6 +60,7 @@ def precision_recall_per_class(
         },
         index=labels,
     )
+
 
 def make_cm_plot(
     y_true,

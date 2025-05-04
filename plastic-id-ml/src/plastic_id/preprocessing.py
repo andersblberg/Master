@@ -12,7 +12,7 @@ def make_pca(n: int, whiten: bool = True):
     class _SafePCA(PCA):
         def fit(self, X, y=None):
             max_comp = min(n, X.shape[1])
-            self.n_components_ = max_comp     # store for downstream logic
+            self.n_components_ = max_comp  # store for downstream logic
             return super().fit(X, y)
 
     return _SafePCA(
@@ -21,20 +21,29 @@ def make_pca(n: int, whiten: bool = True):
         random_state=0,
     )
 
+
 class RowNormalizer(BaseEstimator, TransformerMixin):
     """Divide each spectrum by its L2 norm."""
-    def fit(self, X, y=None): return self
+
+    def fit(self, X, y=None):
+        return self
+
     def transform(self, X):
         norm = np.linalg.norm(X, axis=1, keepdims=True)
         return X / np.maximum(norm, 1e-12)
 
+
 class RowSNV(BaseEstimator, TransformerMixin):
     """Standard Normal Variate per row."""
-    def fit(self, X, y=None): return self
+
+    def fit(self, X, y=None):
+        return self
+
     def transform(self, X):
         mean = X.mean(axis=1, keepdims=True)
-        std  = X.std(axis=1,  keepdims=True)
+        std = X.std(axis=1, keepdims=True)
         return (X - mean) / np.maximum(std, 1e-12)
+
 
 def make_pca(n_comp: int):
     return PCA(n_components=n_comp, whiten=True, random_state=0)

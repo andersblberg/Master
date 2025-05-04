@@ -1,6 +1,7 @@
 # src/plastic_id/evaluation/noise.py
 import numpy as np
 
+
 def add_gaussian_noise(X: np.ndarray, pct: float, rng=None) -> np.ndarray:
     """
     Element-wise Gaussian noise with σ = pct % of each value.

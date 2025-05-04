@@ -1,4 +1,4 @@
-# Plastic-ID-ML 
+![Plastic-ID-ML: NIR Spectral ML Test-bed](C:/Users/Blomberg/Desktop/Master/plastic-id-ml/docs/img/banner.png)
 *Infrared spectral data classification of polymers with Python & ML*
 
 [![Tests](https://github.com/<your-org>/plastic-id-ml/actions/workflows/pytest.yml/badge.svg)](../../actions)

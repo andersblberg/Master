@@ -36,6 +36,7 @@ from sklearn.preprocessing import StandardScaler
 # Argument parsing
 ###############################################################################
 
+
 def parse_args(argv=None):
     parser = argparse.ArgumentParser(
         description="Run PCA on the raw nm940‑nm1720 spectral range and plot the first 3 PCs.",
@@ -72,6 +73,7 @@ def parse_args(argv=None):
 # Main routine
 ###############################################################################
 
+
 def main(argv=None):
     args = parse_args(argv)
 
@@ -107,7 +109,9 @@ def main(argv=None):
     if target_col and target_col in df.columns:
         y = df[target_col]
     elif target_col:
-        print(f"Warning: target column '{target_col}' not found – proceeding unlabeled.")
+        print(
+            f"Warning: target column '{target_col}' not found – proceeding unlabeled."
+        )
 
     # ------------------------------------------------------------------
     # 4. Pre‑processing: impute & scale

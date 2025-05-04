@@ -16,7 +16,7 @@ def train_rf_par_model(
     n_estimators: int = 100,
     test_size: float = 0.20,
     random_state: int = 42,
-    n_jobs: int = -1,            # <─ uses every core
+    n_jobs: int = -1,  # <─ uses every core
     **rf_kwargs,
 ):
     """
@@ -45,7 +45,8 @@ def train_rf_par_model(
         { "model": fitted classifier, "accuracy": float }
     """
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y,
+        X,
+        y,
         test_size=test_size,
         stratify=y,
         random_state=random_state,
