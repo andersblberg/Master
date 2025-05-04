@@ -3,3 +3,16 @@ epochs:         150
 batch_size:      32
 weight_decay: 1.0e-4
 patience:        20   # early stop after 20 epochs w/o improvement
+
+
+
+
+# Tuned on 2025-05-04 via Optuna (study in artifacts/optuna/)
+# n_filters:     16
+# k_size:         3
+# dropout:   0.07874344760988262
+# lr:        0.0002397945525670308
+# batch_size:    32
+# epochs:       150        # keep – Optuna left it unchanged
+# weight_decay: 1.0e-4
+# patience:      20

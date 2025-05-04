@@ -16,16 +16,16 @@ import yaml
 import pandas as pd
 
 # from src.data.loaders import load_raw
-from src.plastic_id.utils.timer import Timer
+from src.plastic_id.utils.timer import timed
 
 
 def merge_dataframes(dfs: list[pd.DataFrame]) -> pd.DataFrame:
-    with Timer("Merge DataFrames", verbose=True):
+    with timed("Merge DataFrames", verbose=True):
         return pd.concat(dfs, ignore_index=True)
 
 
 def drop_missing_spectra(df: pd.DataFrame, spectrum_col: str) -> pd.DataFrame:
-    with Timer("Drop Missing Spectra", verbose=True):
+    with timed("Drop Missing Spectra", verbose=True):
         before = len(df)
         df = df[df[spectrum_col].notna()].copy()
         print(f"Dropped {before - len(df)} rows lacking '{spectrum_col}'")
@@ -33,7 +33,7 @@ def drop_missing_spectra(df: pd.DataFrame, spectrum_col: str) -> pd.DataFrame:
 
 
 def normalize_spectra(df: pd.DataFrame, spectrum_cols: list[str]) -> pd.DataFrame:
-    with Timer("Normalize Spectra", verbose=True):
+    with timed("Normalize Spectra", verbose=True):
         for col in spectrum_cols:
             mn, mx = df[col].min(), df[col].max()
             df[col] = (df[col] - mn) / (mx - mn)
@@ -45,7 +45,7 @@ def organize_categories(
     plastic_col: str,
     other_labels: list[str] = ["reference", "calibration"],
 ) -> pd.DataFrame:
-    with Timer("Organize & Sort Categories", verbose=True):
+    with timed("Organize & Sort Categories", verbose=True):
         mask_other = df[plastic_col].str.lower().isin(other_labels)
         plastics = sorted(df.loc[~mask_other, plastic_col].unique())
         df["Category"] = df[plastic_col].where(~mask_other, "Other")

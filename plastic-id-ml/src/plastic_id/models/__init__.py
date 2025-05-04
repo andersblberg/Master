@@ -32,6 +32,13 @@ REGISTRY: Dict[str, Callable[[dict[str, Any]], object]] = {
     "rf_par": lambda cfg: RandomForestClassifier(n_jobs=-1, **cfg),
     "et": lambda cfg: ExtraTreesClassifier(**cfg),
     "mlp": lambda cfg: MLPClassifier(**cfg),
+    "mlp_tuned": lambda cfg: MLPClassifier(
+        hidden_layer_sizes=(64, 64),
+        learning_rate_init=7.314912068413965e-4,
+        alpha=7.4903600713776925e-3,
+        batch_size=32,
+        **cfg,
+    ),
     "svm": lambda cfg: SVC(probability=True, **cfg),  # default SVM
 }
 
@@ -60,6 +67,14 @@ if XGBClassifier is not None:
 
 if CNNClassifier is not None:
     REGISTRY["cnn"] = lambda cfg: CNNClassifier(**cfg)
+    REGISTRY["cnn_tuned"] = lambda cfg: CNNClassifier(
+        n_filters=16,
+        k_size=3,
+        dropout=0.07874344760988262,
+        lr=2.397945525670308e-4,
+        batch_size=32,
+        **cfg,
+    )
 
 # ---------------------------------------------------------------------------
 _SUFFIX_MAP = {

@@ -1,0 +1,28 @@
+# data:
+#   csv_path: data\interim\combined_DB22_measurements_sorted_clean.csv
+# eval_cv:
+#   n_splits: 10
+#   random_state: 42
+# model:
+#   name: mlp
+#   params:
+#     layer_sizes: !!python/tuple
+#     - 64
+#     - 64
+#     lr_init: 0.0007314912068413965
+#     alpha: 0.0074903600713776925
+#     batch: 32
+
+# configs/experiment/mlp_tuned.yaml
+data:
+  csv_path: data/interim/combined_DB22_measurements_sorted_clean.csv   # ← slash-safe
+eval_cv:
+  n_splits: 10
+  random_state: 42
+model:
+  name: mlp
+  params:
+    hidden_layer_sizes: [64, 64]            # 2-layer, 64 units each
+    learning_rate_init: 0.0007314912068413965
+    alpha: 0.0074903600713776925            # L2 penalty
+    batch_size: 32

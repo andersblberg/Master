@@ -1,0 +1,13 @@
+data:
+  csv_path: data\interim\combined_DB22_measurements_sorted_clean.csv
+eval_cv:
+  n_splits: 10
+  random_state: 42
+model:
+  name: cnn
+  params:
+    n_filters: 16
+    k_size: 3
+    dropout: 0.07874344760988262
+    lr: 0.0002397945525670308
+    batch_size: 32

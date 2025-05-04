@@ -1,0 +1,12 @@
+data:
+  csv_path: data\interim\combined_DB22_measurements_sorted_clean.csv
+eval_cv:
+  n_splits: 10
+  random_state: 42
+model:
+  name: rf
+  params:
+    n_estimators: 400
+    max_depth: 25
+    criterion: entropy
+    bootstrap: false
