@@ -1,7 +1,11 @@
 ![Plastic-ID-ML: NIR Spectral ML Test-bed](docs/img/banner.png)
 *Infrared spectral data classification of polymers with Python & ML*
 
-[![Tests](https://github.com/<your-org>/plastic-id-ml/actions/workflows/pytest.yml/badge.svg)](../../actions)
+<p align="center">
+  <img src="docs/banner-plastic-id-ml.png" alt="Plastic-ID-ML banner" width="600">
+</p>
+
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 This repo contains all the code, configs and utilities developed and used in my M.Sc.-thesis
