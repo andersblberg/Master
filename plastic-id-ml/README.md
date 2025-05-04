@@ -1,9 +1,8 @@
-![Plastic-ID-ML: NIR Spectral ML Test-bed](docs/img/banner.png)
+<!-- ![Plastic-ID-ML: NIR Spectral ML Test-bed](docs/img/banner.png) -->
+
+  <img src="docs/img/banner.png" alt="Plastic-ID-ML banner" width="600">
 *Infrared spectral data classification of polymers with Python & ML*
 
-<p align="center">
-  <img src="docs/img/banner.png" alt="Plastic-ID-ML banner" width="600">
-</p>
 
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
