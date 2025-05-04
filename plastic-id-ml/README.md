@@ -2,7 +2,7 @@
 *Infrared spectral data classification of polymers with Python & ML*
 
 <p align="center">
-  <img src="docs/banner-plastic-id-ml.png" alt="Plastic-ID-ML banner" width="600">
+  <img src="docs/img/banner.png" alt="Plastic-ID-ML banner" width="600">
 </p>
 
 
