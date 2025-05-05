@@ -1,4 +1,4 @@
-hidden_layer_sizes: [128, 64]
+hidden_layer_sizes: [80, 40] # 2-layer, 80 and 40 units each as in ReRemeter's script on github
 max_iter: 600
 alpha: 0.0005
 learning_rate_init: 0.002
