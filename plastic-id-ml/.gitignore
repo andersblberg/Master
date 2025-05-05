@@ -20,7 +20,7 @@ Thumbs.db
 .vscode/
 
 # Compiled files and logs
-*.log
+# *.log
 *.tmp
 *.bak
 
