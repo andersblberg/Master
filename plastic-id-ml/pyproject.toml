@@ -18,6 +18,7 @@ rich         = "^13.7"
 
 # ───────────────────────────────────────────────────────────────
 numpy = "1.26.4"
+seaborn = "^0.13.2"
 [tool.poetry.group.ml.dependencies] # — heavy ML libs
 xgboost = "~2.0"
 torch   = "^2.3.1"

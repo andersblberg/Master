@@ -1,7 +1,21 @@
-n_estimators: 300
-max_depth: 6
-learning_rate: 0.1
-subsample: 0.8
-colsample_bytree: 0.8
-objective: multi:softprob
-eval_metric: mlogloss
+# n_estimators: 300
+# max_depth: 6
+# learning_rate: 0.1
+# subsample: 0.8
+# colsample_bytree: 0.8
+# objective: multi:softprob
+# eval_metric: mlogloss
+
+
+# Tuned parameters
+
+
+n_estimators: 800
+max_depth: 5
+learning_rate: 0.037297375925036735
+min_child_weight: 1
+subsample: 0.6
+colsample_bytree: 0.7
+gamma: 0.0021987019455784263
+reg_lambda: 0.19860128618943984
+reg_alpha: 0.1455646077984361

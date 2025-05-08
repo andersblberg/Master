@@ -50,6 +50,7 @@ REGISTRY.update(
             RowNormalizer(), SVC(probability=True, **c)
         ),
         "svm_snv": lambda c: make_pipeline(RowSNV(), SVC(probability=True, **c)),
+        "svm_snv_tuned": lambda c: make_pipeline(RowSNV(), SVC(probability=True, **c)),
         "svm_pca2": lambda c: make_pipeline(make_pca(2), SVC(probability=True, **c)),
         "svm_pca4": lambda c: make_pipeline(make_pca(4), SVC(probability=True, **c)),
         "svm_pca8": lambda c: make_pipeline(make_pca(8), SVC(probability=True, **c)),
