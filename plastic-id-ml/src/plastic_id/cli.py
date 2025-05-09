@@ -57,6 +57,7 @@ def default(ctx: typer.Context):
         acc = _run_core(cfg)
         typer.echo(json.dumps({"model": "rf", "accuracy": acc}, indent=2))
 
+
 # ------------------------------------------------------------------ #
 # single run (hold-out  or  k-fold CV)
 # ------------------------------------------------------------------ #

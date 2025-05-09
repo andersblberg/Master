@@ -16,18 +16,19 @@ import matplotlib.pyplot as plt
 # --------------------------------------------------
 # 1. CONFIGURATION ---------------------------------
 # --------------------------------------------------
-csv_path   = "data/interim/combined_DB22_measurements_sorted_clean.csv"
+csv_path = "data/interim/combined_DB22_measurements_sorted_clean.csv"
 output_dir = sys.argv[1] if len(sys.argv) > 1 else "plots/histograms"
-img_format = "png"   # png | pdf | svg …
+img_format = "png"  # png | pdf | svg …
 
 # --------------------------------------------------
 # 2. PREP ------------------------------------------
 # --------------------------------------------------
-os.makedirs(output_dir, exist_ok=True)     # create folder if missing
+os.makedirs(output_dir, exist_ok=True)  # create folder if missing
 df = pd.read_csv(csv_path)
 
 raw_cols = [
-    c for c in df.columns
+    c
+    for c in df.columns
     if c.startswith("nm") and not (c.endswith("_snv") or c.endswith("_norm"))
 ]
 plastic_types = df["PlasticType"].unique()
@@ -49,7 +50,7 @@ for ptype in plastic_types:
     fname = f"{ptype}_hist.{img_format}".replace(" ", "_")
     fpath = os.path.join(output_dir, fname)
     plt.savefig(fpath, dpi=300)
-    plt.close()                 # release memory
+    plt.close()  # release memory
 
     print(f"✔ saved {fpath}")
 

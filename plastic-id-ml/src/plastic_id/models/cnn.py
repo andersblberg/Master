@@ -24,20 +24,22 @@ N_CLASSES: Final[int] = 6  # HDPE, LDPE, …, PVC
 # ───────────────────────────── network definition ────────────────────────────
 class _Net(nn.Module):
     def __init__(self, n_filters: int, k_size: int, dropout: float):
-        super().__init__()                   # ←  IMPORTANT
-        pad = k_size // 2                    # same-length padding (odd k)
+        super().__init__()  # ←  IMPORTANT
+        pad = k_size // 2  # same-length padding (odd k)
         # 1-D convolution along the wavelength axis
-        self.conv1   = nn.Conv1d(1,  n_filters,          kernel_size=k_size, padding=pad)
-        self.conv2   = nn.Conv1d(n_filters, 2*n_filters, kernel_size=k_size, padding=pad)
+        self.conv1 = nn.Conv1d(1, n_filters, kernel_size=k_size, padding=pad)
+        self.conv2 = nn.Conv1d(
+            n_filters, 2 * n_filters, kernel_size=k_size, padding=pad
+        )
         self.dropout = nn.Dropout(p=dropout)
 
         # flatten → linear classifier
-        self.out     = nn.Linear(2 * n_filters * N_FEATURES, N_CLASSES)
+        self.out = nn.Linear(2 * n_filters * N_FEATURES, N_CLASSES)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = x.unsqueeze(1)  # (batch, channels=1, 8)
         x = F.relu(self.conv1(x))  # (batch, 16, 8)
-        x = F.relu(self.conv2(x))          # (batch, 2·n_filters, 8)
+        x = F.relu(self.conv2(x))  # (batch, 2·n_filters, 8)
         x = self.dropout(x)
         x = x.view(x.size(0), -1)  # flatten: (batch, 32*8)
         return self.out(x)  # logits for N_CLASSES
@@ -83,8 +85,8 @@ class CNNClassifier(BaseEstimator, ClassifierMixin):
         self.patience = patience
         self.seed = seed
         self.n_filters = n_filters
-        self.k_size    = k_size
-        self.dropout   = dropout
+        self.k_size = k_size
+        self.dropout = dropout
 
     # ────────────── scikit-learn mandatory methods ──────────────
     def fit(self, X: np.ndarray, y: np.ndarray):
@@ -103,12 +105,14 @@ class CNNClassifier(BaseEstimator, ClassifierMixin):
 
         pin = torch.cuda.is_available()
         train_loader = DataLoader(
-            ds_train, batch_size=self.batch_size, shuffle=True,
-            generator=g, pin_memory=pin
+            ds_train,
+            batch_size=self.batch_size,
+            shuffle=True,
+            generator=g,
+            pin_memory=pin,
         )
         val_loader = DataLoader(
-            ds_val, batch_size=self.batch_size, shuffle=False,
-            pin_memory=pin
+            ds_val, batch_size=self.batch_size, shuffle=False, pin_memory=pin
         )
 
         self._net = _Net(self.n_filters, self.k_size, self.dropout)

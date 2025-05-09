@@ -25,6 +25,7 @@ or
 
 poetry run python -m plastic_id.tools.hyperparameter_tuning --model mlp --trials 40 --outfile configs/experiment/mlp_tuned.yaml --logdir artifacts\hyperpar_logs
 """
+
 from __future__ import annotations
 
 import argparse
@@ -55,7 +56,7 @@ parser.add_argument("--outfile", type=Path, required=True)
 parser.add_argument(
     "--logdir",
     type=Path,
-    default=Path("logs"),          # <── all logs end up here
+    default=Path("logs"),  # <── all logs end up here
     help="Directory for *.log files (will be created if missing).",
 )
 args = parser.parse_args()
@@ -158,15 +159,14 @@ def mlp_space(trial):
         # network size ----------------------------------------------------------
         "hidden_layer_sizes": tuple(
             trial.suggest_categorical(
-                "layer_sizes",
-                [(64,), (128,), (64, 64), (128, 64), (128, 128)]
+                "layer_sizes", [(64,), (128,), (64, 64), (128, 64), (128, 128)]
             )
         ),
         # optimisation ----------------------------------------------------------
         "learning_rate_init": trial.suggest_float("lr_init", 1e-4, 3e-2, log=True),
-        "alpha":              trial.suggest_float("alpha",   1e-6, 1e-2, log=True),  # ℓ2
-        "batch_size":         trial.suggest_categorical("batch", [32, 64, 128]),
-        "max_iter": 200,                  # ← keep short for CV
+        "alpha": trial.suggest_float("alpha", 1e-6, 1e-2, log=True),  # ℓ2
+        "batch_size": trial.suggest_categorical("batch", [32, 64, 128]),
+        "max_iter": 200,  # ← keep short for CV
         "early_stopping": True,
         "random_state": 42,
     }
@@ -175,10 +175,10 @@ def mlp_space(trial):
 def cnn_space(trial):
     return {
         "n_filters": trial.suggest_categorical("n_filters", [8, 16, 32]),
-        "k_size":    trial.suggest_categorical("k_size",    [3, 5, 7]),
-        "dropout":   trial.suggest_float      ("dropout",   0.0, 0.5),
-        "lr":        trial.suggest_float      ("lr",        1e-4, 1e-2, log=True),
-        "batch_size":trial.suggest_categorical("batch",     [16, 32, 64]),
+        "k_size": trial.suggest_categorical("k_size", [3, 5, 7]),
+        "dropout": trial.suggest_float("dropout", 0.0, 0.5),
+        "lr": trial.suggest_float("lr", 1e-4, 1e-2, log=True),
+        "batch_size": trial.suggest_categorical("batch", [16, 32, 64]),
         # epochs / patience left at default (150/20) – they don’t affect the net’s shape
     }
 
@@ -189,8 +189,8 @@ SPACE = {
     "et": et_space,
     "svm_snv": svm_space,
     "xgb": xgb_space,
-    "mlp":  mlp_space,
-    "cnn":  cnn_space,
+    "mlp": mlp_space,
+    "cnn": cnn_space,
 }
 
 if args.model not in SPACE:
@@ -205,24 +205,19 @@ if args.model not in SPACE:
 # ------------------------------------------------------------------ #
 def objective(trial):
     params = SPACE[args.model](trial)
-    clf    = get_model(args.model, params)
-    score  = cross_val_score(
-        clf, X, y, cv=kf, scoring="accuracy", n_jobs=-1
-    ).mean()
+    clf = get_model(args.model, params)
+    score = cross_val_score(clf, X, y, cv=kf, scoring="accuracy", n_jobs=-1).mean()
     return score
+
 
 def log_callback(study: optuna.Study, trial: optuna.trial.FrozenTrial):
     """Write one line per finished trial to the log file *and* console."""
     if trial.value is not None and not np.isnan(trial.value):
         logger.info(
-            f"trial={trial.number:03d}  "
-            f"acc={trial.value:.4f}  "
-            f"{trial.params}"
+            f"trial={trial.number:03d}  " f"acc={trial.value:.4f}  " f"{trial.params}"
         )
-    else:                          # failed / nan trial – still record params
-        logger.info(
-            f"trial={trial.number:03d}  acc=FAIL  {trial.params}"
-        )
+    else:  # failed / nan trial – still record params
+        logger.info(f"trial={trial.number:03d}  acc=FAIL  {trial.params}")
 
 
 study = optuna.create_study(direction="maximize")
