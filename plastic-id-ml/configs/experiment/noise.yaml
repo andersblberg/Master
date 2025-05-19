@@ -16,7 +16,6 @@ model:
   name: et               # will be overwritten by -m flag if desired
   params: {}
 
-# NEW – interpreted only by the patch above
 eval_noise:
-  pct: 9.0               # 3 % of each value as σ
+  pct: 3.0               # 3 % of each value as σ
   rng: 42                # fixed seed so runs are repeatable

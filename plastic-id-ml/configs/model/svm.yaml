@@ -1,4 +1,3 @@
-# svm.yaml
 C: 10
 kernel: rbf
 gamma: scale

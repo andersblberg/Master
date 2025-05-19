@@ -1,4 +1,3 @@
-# src/plastic_id/evaluation/noise.py
 import numpy as np
 
 

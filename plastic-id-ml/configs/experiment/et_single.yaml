@@ -1,19 +1,13 @@
-# ---------------------------------------------------------------------
-# Dataset
-# ---------------------------------------------------------------------
 data:
-  # path is relative to the project root
   csv_path: data/interim/combined_DB22_measurements_sorted_clean.csv
 
 # ---------------------------------------------------------------------
 # Model
 # ---------------------------------------------------------------------
 model:
-  # which implementation the CLI should instantiate
   name: et          # <- "et" = ExtraTreesClassifier
 
-  # hyper-parameters for *this* single run
   params:
-    n_estimators: 800    # number of trees
-    max_depth:    25     # limit tree depth to fight over-fitting
-    random_state: 0      # reproducible results
+    n_estimators: 800
+    max_depth:    25
+    random_state: 0

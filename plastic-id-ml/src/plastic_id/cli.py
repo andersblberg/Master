@@ -1,8 +1,6 @@
 """
-Typer CLI for the plastic‑ID ML toolkit
-Commands:
-    run   – train/evaluate any model in the registry
-    noise – same, but with Gaussian noise levels
+Typer CLI for plastic‑-id-ml
+
 """
 
 from __future__ import annotations
@@ -63,12 +61,12 @@ def default(ctx: typer.Context):
 # ------------------------------------------------------------------ #
 def _run_core(cfg: dict) -> dict:
     """
-    • If the YAML contains an `eval_cv:` stanza → k-fold CV.
+    • If the YAML contains an `eval_cv:` stanza -> k-fold CV.
     • Otherwise fall back to the classic 80 / 20 split.
 
     Semantics shared by both modes
     ──────────────────────────────
-    – test-noise is injected **only** into the current test partition
+    – test-noise is injected only into the current test part
     – ablation (dropping wavelengths) is applied to BOTH train & test
     """
 
@@ -76,7 +74,7 @@ def _run_core(cfg: dict) -> dict:
     ds = PlasticDataset(Path(cfg["data"]["csv_path"]))
 
     # =================================================================
-    # A) ------------- k-fold cross-validation branch ------------------
+    # ------------- k-fold cross-validation branch --------------------
     # =================================================================
     if "eval_cv" in cfg:
         cv_cfg = cfg["eval_cv"] or {}
@@ -112,7 +110,7 @@ def _run_core(cfg: dict) -> dict:
                 X_train = drop_channels(X_train, chans)
                 X_test = drop_channels(X_test, chans)
 
-            # ---- optional gaussian noise on TEST only ----------------
+            # ---------------- gaussian noise on TEST only ----------------
             if "eval_noise" in cfg:
                 from plastic_id.evaluation.noise import add_gaussian_noise
 
@@ -145,7 +143,7 @@ def _run_core(cfg: dict) -> dict:
 
         typer.echo(pretty_report(y_true_all, y_pred_all))
 
-        # ---------- artefacts: SINGLE folder --------------------------
+        # ---------- artifacts: SINGLE folder --------------------------
         tag = cfg["model"]["name"] + "_cv"
         run_dir = _run_dir(tag)
 
@@ -154,7 +152,7 @@ def _run_core(cfg: dict) -> dict:
             y_true_all,
             y_pred_all,
             tag,
-            model=None,  # no single fold model
+            model=None,
             X_test=None,
             run_dir=run_dir,
         )
@@ -208,7 +206,7 @@ def _run_core(cfg: dict) -> dict:
 
         save_model(full_model, tag, run_dir=run_dir)
 
-        # tree models → feature importance plot
+        # tree models -> feature importance plot
         from plastic_id.evaluation import (
             _maybe_save_feature_importance,
             DEFAULT_WAVE_LABELS,
@@ -244,12 +242,12 @@ def _run_core(cfg: dict) -> dict:
         }
 
     # =================================================================
-    # B) -------------- classic 80 / 20 hold-out split -----------------
+    # B) -------------- LEGACY.... classic 80 / 20 hold-out split ------
     # =================================================================
     X_train, X_test = ds.X_train, ds.X_test
     y_train, y_test = ds.y_train, ds.y_test
 
-    # optional ablation
+    # optional ablation, tree models only unfortunately...
     if "eval_ablation" in cfg:
         from plastic_id.evaluation.ablation import drop_channels, CHANNEL_IDX
 
@@ -279,7 +277,7 @@ def _run_core(cfg: dict) -> dict:
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
 
-    # single-split artefacts
+    # single-split artifacts
     typer.echo(pretty_report(y_test, y_pred))
 
     tag = cfg["model"]["name"]
@@ -299,7 +297,6 @@ def _run_core(cfg: dict) -> dict:
 # --------------------------------------------------------------------------- #
 @app.command()
 def run(
-    #                      ↓  Option → Argument  (positional, no --model flag)
     model: Optional[str] = typer.Argument(
         None,  # default = use whatever the YAML says
         help="Model key (rf, svm, mlp, et, xgb). "
@@ -371,7 +368,7 @@ def grid(
 
 
 # --------------------------------------------------------------------------- #
-# visualisation                                                               #
+# visualization                                                               #
 # --------------------------------------------------------------------------- #
 @app.command()
 def viz(
@@ -383,14 +380,14 @@ def viz(
 ):
     """Quick look at transformed spectra / PCA scores."""
     ds = PlasticDataset(csv_path)
-    X = ds.X_train[:rows, :]  # take first N for speed
+    X = ds.X_train[:rows, :]
 
     if type == "norm":
         X = RowNormalizer().fit_transform(X)
     elif type == "snv":
         X = RowSNV().fit_transform(X)
     elif type.startswith("pca"):
-        n = int(type[3:])  # grabs 20 / 40 / 80
+        n = int(type[3:])
         X = make_pca(n).fit_transform(X)
     elif type != "raw":
         typer.echo(f"Unknown --type {type}", err=True)

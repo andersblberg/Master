@@ -1,7 +1,3 @@
-# ────────────────────────────────────────────────────────────────────────────────
-# src/plastic_id/evaluation/__init__.py
-# Persist everything produced by one training / evaluation run
-# ────────────────────────────────────────────────────────────────────────────────
 from __future__ import annotations
 
 import datetime
@@ -32,10 +28,8 @@ DEFAULT_WAVE_LABELS = [
 ]
 
 
-# local helpers ---------------------------------------------------------------
 from .metrics import compute_metrics, precision_recall_per_class
 
-# root directory that will hold one sub-folder per run
 ARTIFACTS_ROOT = Path("artifacts")
 
 
@@ -92,7 +86,7 @@ def _maybe_save_feature_importance(
         return
 
     imp = model.feature_importances_
-    order = np.argsort(imp)  # ascending; makes the plot nicer
+    order = np.argsort(imp)
 
     fig, ax = plt.subplots(figsize=(6, 4))
     ax.barh(np.array(wave_labels)[order], imp[order], color="steelblue")
@@ -125,7 +119,7 @@ def save_reports(
     wave_labels: list[str] | None = None,
 ) -> None:
     """
-    Persist *all* evaluation artefacts for one run in its dedicated folder:
+    Persist all evaluation artefacts for one run in its dedicated folder:
 
     ├─ confusion_matrix.png
     ├─ metrics.json               (overall accuracy / macro-F1 …)

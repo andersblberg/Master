@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 Script to merge & preprocess raw spectroscopic data.
 """
@@ -15,7 +14,6 @@ import argparse
 import yaml
 import pandas as pd
 
-# from src.data.loaders import load_raw
 from src.plastic_id.utils.timer import timed
 
 
@@ -69,14 +67,11 @@ def preprocess_all(
 
 
 def main(config_path: str):
-    # 1) Load config
     with open(config_path) as f:
         cfg = yaml.safe_load(f)
 
-    # 2) Load raw CSVs
     dfs = load_raw(cfg)
 
-    # 3) Preprocess
     processed = preprocess_all(
         dfs,
         spectrum_cols=cfg["data"]["spectrum_cols"],
@@ -84,14 +79,12 @@ def main(config_path: str):
         spectrum_col=cfg["data"]["spectrum_col"],
     )
 
-    # 4) Save processed data
     out_csv = cfg["data"]["processed_path"]
     summary_csv = cfg["data"]["summary_path"]
     os.makedirs(os.path.dirname(out_csv), exist_ok=True)
     processed.to_csv(out_csv, index=False)
     print(f"Saved processed data to {out_csv}")
 
-    # 5) Save summary counts
     counts = (
         processed["Category"]
         .value_counts()

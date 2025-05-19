@@ -1,15 +1,15 @@
-#!/usr/bin/env python
 """
 Interactive wrapper around `pid grid`
 
-• Lists available dataset-config YAMLs
-• Lets you choose 1-N registered model keys
-• Lets you choose ONE pre-processing (raw / norm / snv)
-• Builds and launches the exact `poetry run pid grid …` command
+- Lists available dataset-config YAMLs
+- Lets you choose 1-N registered model keys
+- Lets you choose one pre-processing (raw / norm / snv)
+- Builds and launches the exact `poetry run pid grid …` command
 -----------------------------------------------------------------
 Run with:  poetry run python src/plastic_id/tools/interactive_runner.py
 -----------------------------------------------------------------
 """
+
 from __future__ import annotations
 
 import subprocess
@@ -30,9 +30,9 @@ def _prepare_ablation_cfg(base_cfg_path: str) -> str:
     """
     Interactively ask which channels to drop, clone the YAML into a
     temp file, inject the chosen list under `eval_ablation.channels`,
-    and return the *new* path.
+    and return the new path.
     """
-    typer.echo("\n  Ablation - choose wavelengths to drop")
+    typer.echo("\n Ablation - choose wavelengths to drop")
     typer.echo("  [0]  type your own comma-separated list")
     for i, wv in enumerate(_ABL_WAVELENGTHS, 1):
         typer.echo(f"  [{i}]  {wv}")
@@ -42,23 +42,22 @@ def _prepare_ablation_cfg(base_cfg_path: str) -> str:
 
     # ── decide the list/loop spec ───────────────────────────────
     if choice == 0:
-        # chans = [int(x) for x in typer.prompt("Comma-separated wavelengths").split(",")]
         raw = [
             int(x)
             for x in typer.prompt(
                 "Comma-separated list (index 1-8 or wavelength)"
             ).split(",")
         ]
-        # translate 1-8 → wavelengths; leave real wavelengths untouched
+        # translate 1-8 > wavelengths; leave real wavelengths untouched
 
         chans: list[int] = []
         for val in raw:
-            if 1 <= val <= 8:  # menu index → wavelength
+            if 1 <= val <= 8:  # menu index -> wavelength
                 chans.append(_ABL_WAVELENGTHS[val - 1])
-            elif val in _ABL_WAVELENGTHS:  # already a wavelength
+            elif val in _ABL_WAVELENGTHS:
                 chans.append(val)
             else:
-                # ── graceful error and exit ───────────────────────────
+                # ── error and exit ───────────────────────────
                 typer.secho(
                     f"  ✘  '{val}' is neither 1-8 nor a valid wavelength "
                     f"({_ABL_WAVELENGTHS}).  Aborted.",
@@ -73,7 +72,7 @@ def _prepare_ablation_cfg(base_cfg_path: str) -> str:
     elif choice == 10:
         chans = "PAIRS"
     else:
-        typer.secho(" Invalid choice – aborted.", fg=typer.colors.RED)
+        typer.secho("Invalid choice – aborted.", fg=typer.colors.RED)
         raise typer.Exit(1)
 
     # ── clone YAML and inject field ─────────────────────────────
@@ -130,26 +129,24 @@ def run() -> None:
         ds_name = list(datasets.keys())[ds_idx - 1]
         cfg_file = datasets[ds_name]
     except (IndexError, ValueError):
-        typer.secho(" Invalid selection.", fg=typer.colors.RED)
+        typer.secho("Invalid selection.", fg=typer.colors.RED)
         raise typer.Exit(1)
 
     # ── model prompt ───────────────────────────────────────────
-    typer.echo("\n  Available models")
+    typer.echo("\n Available models")
     for i, m in enumerate(_MODEL_KEYS, 1):
         typer.echo(f"  [{i}]  {m}")
-    raw = typer.prompt(
-        "Select one *or more* model numbers (comma-separated, e.g. 1,5,8)"
-    )
+    raw = typer.prompt("Select one or more model numbers (comma-separated, e.g. 1,5,8)")
 
     try:
         indices = [int(s.strip()) - 1 for s in raw.split(",")]
         models_base = [_MODEL_KEYS[i] for i in indices]
     except Exception:
-        typer.secho(" Invalid model list.", fg=typer.colors.RED)
+        typer.secho("Invalid model list.", fg=typer.colors.RED)
         raise typer.Exit(1)
 
     # ── pre-processing prompt ──────────────────────────────────
-    typer.echo("\n  Pre-processing")
+    typer.echo("\n Pre-processing")
     typer.echo("  [1]  raw   (no scaling)")
     typer.echo("  [2]  norm  (row normaliser)")
     typer.echo("  [3]  snv   (row SNV)")

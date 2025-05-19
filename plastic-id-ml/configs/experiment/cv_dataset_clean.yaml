@@ -9,13 +9,13 @@ data:
 # ---------------------------------------------------------------------
 model:
   name: et
-  params: {}          # or tuned hyper-params
+  params: {}
 
 eval_cv:
   n_splits: 10
   random_state: 42
 
 # ---------------------------------------------------------------------
-# Cross-validation control  ⟵  NEW (5-fold CV)
+# Cross-validation control  <-  (5-fold CV)
 # ---------------------------------------------------------------------
 cross_val: 10          # integer = number of folds

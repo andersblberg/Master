@@ -79,14 +79,12 @@ logger = logging.getLogger(__name__)
 # ------------------------------------------------------------------ #
 # Data + CV splitter
 # ------------------------------------------------------------------ #
-# ds = PlasticDataset(Path(args.csv))
-# X, y = ds.X, ds.y
 kf = StratifiedKFold(n_splits=10, shuffle=True, random_state=42)
 
 ds = PlasticDataset(Path(args.csv))
 X = ds.X
 le = LabelEncoder()
-y = le.fit_transform(ds.y)  # y is now 0 … 5 instead of strings
+y = le.fit_transform(ds.y)
 
 
 # ------------------------------------------------------------------ #
@@ -95,7 +93,6 @@ y = le.fit_transform(ds.y)  # y is now 0 … 5 instead of strings
 def rf_space(trial):
     return {
         "n_estimators": trial.suggest_int("n_estimators", 200, 900, step=100),
-        # allow “no limit” by explicitly listing None
         "max_depth": trial.suggest_categorical(
             "max_depth", [None] + list(range(5, 55, 5))
         ),
@@ -108,7 +105,7 @@ def et_space(trial):
     return {
         # trees
         "n_estimators": trial.suggest_int("n_estimators", 100, 1000, step=100),
-        # allow *either* an integer depth or unlimited (None)
+        # allow either an integer depth or unlimited (None)
         "max_depth": trial.suggest_categorical(
             "max_depth", [None] + list(range(5, 55, 5))  # None, 5, 10, … 50
         ),
@@ -132,6 +129,11 @@ def svm_space(trial):
     }
 
 
+def svm_pca2_space(trial):
+    """Same hyper-parameters as plain SVM; PCA(2) is handled in get_model."""
+    return svm_space(trial)
+
+
 def xgb_space(trial):
     return {
         # capacity / complexity -------------------------------------------------
@@ -145,7 +147,7 @@ def xgb_space(trial):
         "gamma": trial.suggest_float("gamma", 0.0, 5.0),
         "reg_lambda": trial.suggest_float("reg_lambda", 0.0, 5.0),
         "reg_alpha": trial.suggest_float("reg_alpha", 0.0, 5.0),
-        # bookkeeping — **keep everything except use_label_encoder**
+        # bookkeeping — keep everything except use_label_encoder
         "objective": "multi:softprob",
         "eval_metric": "mlogloss",
         "random_state": 42,
@@ -188,6 +190,7 @@ SPACE = {
     "rf_par": rf_space,
     "et": et_space,
     "svm_snv": svm_space,
+    "svm_pca2": svm_pca2_space,
     "xgb": xgb_space,
     "mlp": mlp_space,
     "cnn": cnn_space,
@@ -211,7 +214,7 @@ def objective(trial):
 
 
 def log_callback(study: optuna.Study, trial: optuna.trial.FrozenTrial):
-    """Write one line per finished trial to the log file *and* console."""
+    """Write one line per finished trial to the log file and console."""
     if trial.value is not None and not np.isnan(trial.value):
         logger.info(
             f"trial={trial.number:03d}  " f"acc={trial.value:.4f}  " f"{trial.params}"

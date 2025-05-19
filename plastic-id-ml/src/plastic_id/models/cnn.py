@@ -1,6 +1,3 @@
-# ──────────────────────────────────────────────────────────────────────────────
-# src/plastic_id/models/cnn.py
-# ──────────────────────────────────────────────────────────────────────────────
 from __future__ import annotations
 from typing import Final
 
@@ -17,15 +14,15 @@ from sklearn.utils.validation import check_is_fitted
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-N_FEATURES: Final[int] = 8  # 8 wavelength bands
-N_CLASSES: Final[int] = 6  # HDPE, LDPE, …, PVC
+N_FEATURES: Final[int] = 8
+N_CLASSES: Final[int] = 6
 
 
 # ───────────────────────────── network definition ────────────────────────────
 class _Net(nn.Module):
     def __init__(self, n_filters: int, k_size: int, dropout: float):
-        super().__init__()  # ←  IMPORTANT
-        pad = k_size // 2  # same-length padding (odd k)
+        super().__init__()
+        pad = k_size // 2
         # 1-D convolution along the wavelength axis
         self.conv1 = nn.Conv1d(1, n_filters, kernel_size=k_size, padding=pad)
         self.conv2 = nn.Conv1d(
@@ -33,19 +30,17 @@ class _Net(nn.Module):
         )
         self.dropout = nn.Dropout(p=dropout)
 
-        # flatten → linear classifier
+        # flatten, linear classifier
         self.out = nn.Linear(2 * n_filters * N_FEATURES, N_CLASSES)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = x.unsqueeze(1)  # (batch, channels=1, 8)
         x = F.relu(self.conv1(x))  # (batch, 16, 8)
-        x = F.relu(self.conv2(x))  # (batch, 2·n_filters, 8)
+        x = F.relu(self.conv2(x))  # (batch, 2 n_filters, 8)
         x = self.dropout(x)
         x = x.view(x.size(0), -1)  # flatten: (batch, 32*8)
         return self.out(x)  # logits for N_CLASSES
 
-
-# ───────────────────────── wrapper: scikit-learn style ───────────────────────
 class CNNClassifier(BaseEstimator, ClassifierMixin):
     """
     Small PyTorch net wrapped in scikit-learn API.
@@ -88,13 +83,11 @@ class CNNClassifier(BaseEstimator, ClassifierMixin):
         self.k_size = k_size
         self.dropout = dropout
 
-    # ────────────── scikit-learn mandatory methods ──────────────
     def fit(self, X: np.ndarray, y: np.ndarray):
         g = torch.Generator().manual_seed(self.seed)
         X = torch.tensor(X, dtype=torch.float32)
         y = torch.tensor(self._encode_labels(y), dtype=torch.long)
 
-        # expose labels in the scikit-learn-standard place
         self.classes_ = self._classes_
 
         ds = TensorDataset(X, y)
@@ -135,7 +128,6 @@ class CNNClassifier(BaseEstimator, ClassifierMixin):
                 loss.backward()
                 opt.step()
 
-            # ── validation loss for early-stopping ──
             self._net.eval()
             with torch.no_grad():
                 val_loss = 0.0
@@ -145,16 +137,15 @@ class CNNClassifier(BaseEstimator, ClassifierMixin):
                     val_loss += crit(self._net(xb), yb).item() * len(xb)
                 val_loss /= len(ds_val)
 
-            if val_loss < best_val - 1e-4:  # tiny tolerance
+            if val_loss < best_val - 1e-4:
                 best_val = val_loss
                 since_improved = 0
                 self._best_state = self._net.state_dict()  # save best params
             else:
                 since_improved += 1
                 if since_improved >= self.patience:
-                    break  # early stop
+                    break
 
-        # load best weights
         self._net.load_state_dict(self._best_state)
         self._net.eval()
         return self
@@ -173,7 +164,6 @@ class CNNClassifier(BaseEstimator, ClassifierMixin):
             logits = self._net(X)
             return F.softmax(logits, dim=1).cpu().numpy()
 
-    # ────────────── helper: label ↔ integer mapping ─────────────
     def _encode_labels(self, y: np.ndarray) -> np.ndarray:
         if not hasattr(self, "_classes_"):
             self._classes_ = np.unique(y)

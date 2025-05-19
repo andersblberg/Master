@@ -72,7 +72,7 @@ def make_cm_plot(
     dpi: int = 200,
 ):
     """
-    Render and (optionally) save a confusion-matrix plot.
+    Render and save a confusion-matrix plot.
 
     Parameters
     ----------
@@ -83,7 +83,7 @@ def make_cm_plot(
     dpi            : resolution for saved image
     Returns
     -------
-    matplotlib.figure.Figure
+
     """
     fig, ax = plt.subplots(figsize=(5, 4))
     ConfusionMatrixDisplay.from_predictions(

@@ -1,4 +1,3 @@
-# src/plastic_id/preprocessing.py
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
 import numpy as np

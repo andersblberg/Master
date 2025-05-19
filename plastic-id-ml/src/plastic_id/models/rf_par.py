@@ -1,5 +1,4 @@
 # ────────────────────────────────────────────────────────────────
-# src/plastic_id/models/rf_par.py
 # Parallel Random-Forest helper (all CPU cores)
 # ────────────────────────────────────────────────────────────────
 from __future__ import annotations
@@ -19,31 +18,7 @@ def train_rf_par_model(
     n_jobs: int = -1,  # <─ uses every core
     **rf_kwargs,
 ):
-    """
-    Train a *parallel* Random-Forest classifier and report hold-out accuracy.
 
-    Parameters
-    ----------
-    X : array-like, shape (n_samples, n_features)
-        Feature matrix.
-    y : array-like, shape (n_samples,)
-        Ground-truth labels.
-    n_estimators : int, default 100
-        Number of trees in the forest.
-    test_size : float, default 0.20
-        Fraction reserved for validation.
-    random_state : int, default 42
-        Reproducibility seed.
-    n_jobs : int, default -1
-        How many CPU cores to use.  -1 ⇒ all.
-    **rf_kwargs :
-        Any other `sklearn.ensemble.RandomForestClassifier` keyword.
-
-    Returns
-    -------
-    dict
-        { "model": fitted classifier, "accuracy": float }
-    """
     X_train, X_test, y_train, y_test = train_test_split(
         X,
         y,

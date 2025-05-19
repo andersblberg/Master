@@ -5,11 +5,11 @@ data:
 # Cross-validation
 # ---------------------------------------------------------------------
 eval_cv:
-  n_splits: 10          # or 5 if you prefer
+  n_splits: 10          # or 5,15 or all of then if you prefer LOOCV
   random_state: 42
 
 model:
-  name: rf            # overridden from CLI as usual
+  name: rf            # overridden from CLI
   params: {}
 
 eval_ablation:

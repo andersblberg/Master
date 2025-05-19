@@ -20,7 +20,7 @@ def drop_channels(X: np.ndarray, channels):
 
 
 def gen_single_drop():
-    for ch in CHANNEL_IDX:  # yields tuples (channel, kept_mask_fn)
+    for ch in CHANNEL_IDX:
         yield (ch, lambda X, ch=ch: drop_channels(X, [ch]))
 
 

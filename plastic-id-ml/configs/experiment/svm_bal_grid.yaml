@@ -9,4 +9,4 @@ model:
     gamma: ["scale", 0.01, 0.001]
     kernel: ["rbf"]
 cv:
-  n_splits: 5        # if your CLI supports cross‑val
+  n_splits: 5

@@ -1,8 +1,3 @@
-# ───────────────────────────────────────────────────────────────
-# src/plastic_id/models/__init__.py
-# Central registry: maps a short string → callable that returns a
-# fully-configured estimator or sklearn.pipeline.Pipeline.
-# ───────────────────────────────────────────────────────────────
 from __future__ import annotations
 
 from typing import Any, Callable, Dict
@@ -86,11 +81,11 @@ _SUFFIX_MAP = {
 
 def get_model(name: str, cfg: dict[str, Any]):
     """
-    Return an *unfitted* model or model-pipeline by key.
+    Return an unfitted model or model-pipeline by key.
 
     ─ accepted keys ───────────────────────────────────────────────
-    rf, svm, et, xgb, …                ← raw spectra
-    svm_norm, rf_snv, cnn_norm, …      ← any <model> + _norm / _snv
+    rf, svm, et, xgb, …                <- raw spectra
+    svm_norm, rf_snv, cnn_norm, …      <- any <model> + _norm / _snv
     ----------------------------------------------------------------
     """
     # --- 1. does the key carry a preprocessing suffix? -------------
