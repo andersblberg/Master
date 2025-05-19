@@ -10,16 +10,15 @@
 
 This repo contains all the code, configs and utilities developed and used in my M.Sc.-thesis
 work on **evaluating ML model performance on classifying polymers (HDPE, LDPE, PET, PP, PS, PVC, …)**
-from their near-infra-red / FT-IR spectra derived from the [![Plastic-Scanner](https://github.com/Plastic-Scanner)] project.
+from their near-infra-red spectra derived from the [![Plastic-Scanner](https://github.com/Plastic-Scanner)] project.
 
 | **Highlights** | |
 |----------------|--------------------------------------------------------------|
 | • Reproducible pipelines powered by Poetry + Hydra | environment & config management |
 | • Modular dataset + preprocessing stack | SNV, row-normalisation, PCA, noise injection |
-| • Pluggable model zoo | SVM, Random-Forest, XGBoost, MLP, 1-D CNN |
-| • One-command experiment runner | `poetry run pid train …` |
+| • Pluggable model zoo | SVM, Random-Forest, XGBoost, MLP, 1-D CNN, ET |
+| • One-command experiment runner | `poetry run python src/plastic_id/tools/interactive_runner.py` |
 | • Rich evaluation artefacts | confusion matrix, PR curves, per-class metrics |
-| • Growing test-suite (pytest) | loaders, transforms, registry sanity |
 
 ---
 
